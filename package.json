@@ -1,0 +1,11 @@
+
+{
+  "name": "permitpro-monorepo",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "concurrently \"npm start --prefix permitpro-backend\" \"npm start --prefix permitpro-frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
