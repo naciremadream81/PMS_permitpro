@@ -4,10 +4,6 @@
   "description": "PermitPro - Permit Management System",
   "main": "server.js",
   "private": true,
-  "workspaces": [
-    "permitpro-backend",
-    "permitpro-frontend"
-  ],
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
