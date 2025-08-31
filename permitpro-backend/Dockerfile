@@ -1,5 +1,5 @@
 # Use Bun base image with OpenSSL
-FROM oven/bun:1 as base
+FROM oven/bun:1 AS base
 WORKDIR /app
 
 # Install system dependencies in a single layer
@@ -17,7 +17,7 @@ COPY package.json bun.lock ./
 COPY prisma/ ./prisma/
 
 # Install dependencies (Prisma client will be generated automatically)
-RUN bun install --frozen-lockfile --production=false
+RUN bun install --frozen-lockfile
 
 # Copy application source code
 COPY . .
