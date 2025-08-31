@@ -122,7 +122,18 @@ app.get('/api/permits/:id', async (req, res) => {
 
 app.post('/api/permits', async (req, res) => {
   try {
-    const { customerName, propertyAddress, county, permitType, contractorId } = req.body;
+    const { customerName, propertyAddress, county, permitType, contractorLicense } = req.body;
+    
+    // Validate contractor exists if license provided
+    if (contractorLicense) {
+      const contractor = await prisma.contractor.findUnique({
+        where: { licenseNumber: contractorLicense }
+      });
+      
+      if (!contractor) {
+        return res.status(400).json({ error: 'Invalid contractor license number' });
+      }
+    }
     
     const newPackage = await prisma.package.create({
       data: {
@@ -131,7 +142,7 @@ app.post('/api/permits', async (req, res) => {
         county,
         permitType,
         status: 'Draft',
-        contractorId: contractorId ? parseInt(contractorId) : null
+        contractorLicense: contractorLicense || null
       },
       include: {
         documents: true,
@@ -334,11 +345,22 @@ app.put('/api/subcontractors/:id', async (req, res) => {
 app.put('/api/permits/:id/contractor', async (req, res) => {
   try {
     const packageId = parseInt(req.params.id);
-    const { contractorId } = req.body;
+    const { contractorLicense } = req.body;
+    
+    // Validate contractor exists
+    if (contractorLicense) {
+      const contractor = await prisma.contractor.findUnique({
+        where: { licenseNumber: contractorLicense }
+      });
+      
+      if (!contractor) {
+        return res.status(400).json({ error: 'Invalid contractor license number' });
+      }
+    }
     
     const updatedPackage = await prisma.package.update({
       where: { id: packageId },
-      data: { contractorId: parseInt(contractorId) },
+      data: { contractorLicense: contractorLicense || null },
       include: {
         documents: true,
         contractor: true,

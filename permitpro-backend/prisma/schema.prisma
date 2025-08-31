@@ -15,9 +15,8 @@ model User {
 }
 
 model Contractor {
-  id            Int       @id @default(autoincrement())
+  licenseNumber String    @id @unique
   companyName   String
-  licenseNumber String    @unique
   address       String
   phoneNumber   String
   email         String?
@@ -52,9 +51,9 @@ model Package {
   createdAt       DateTime               @default(now())
   updatedAt       DateTime               @updatedAt
   permitType      String                 @default("Mobile Home Permit")
-  contractorId    Int
+  contractorLicense String?              // Optional reference to contractor by license
+  contractor      Contractor?            @relation(fields: [contractorLicense], references: [licenseNumber])
   documents       Document[]
-  contractor      Contractor             @relation(fields: [contractorId], references: [id])
   subcontractors  PackageSubcontractor[]
 }
 
