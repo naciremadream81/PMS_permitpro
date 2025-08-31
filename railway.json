@@ -5,7 +5,7 @@
     "dockerfile": "Dockerfile"
   },
   "deploy": {
-    "startCommand": "bun run start",
+    "startCommand": "./start.sh",
     "healthcheckPath": "/api/permits",
     "healthcheckTimeout": 300,
     "restartPolicyType": "ON_FAILURE",
