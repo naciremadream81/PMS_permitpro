@@ -7,7 +7,12 @@ const path = require('path'); // Added for path.extname
 const app = express();
 const prisma = new PrismaClient();
 
-app.use(cors());
+// CORS configuration
+const corsOptions = {
+  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  credentials: true
+};
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Configure multer for file uploads with better file naming
@@ -474,7 +479,11 @@ process.on('beforeExit', async () => {
   await prisma.$disconnect();
 });
 
-app.listen(8000, () => {
-  console.log('Backend running on http://localhost:8000');
+const PORT = process.env.PORT || 8000;
+const NODE_ENV = process.env.NODE_ENV || 'development';
+
+app.listen(PORT, () => {
+  console.log(`Backend running on http://localhost:${PORT}`);
+  console.log(`Environment: ${NODE_ENV}`);
   console.log('Database connected via Prisma');
 });
