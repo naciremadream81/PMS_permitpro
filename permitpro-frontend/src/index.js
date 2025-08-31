@@ -228,7 +228,7 @@ const CreatePackageModal = ({ isOpen, onClose, onPackageCreate, contractors }) =
     const [propertyAddress, setPropertyAddress] = useState('');
     const [county, setCounty] = useState(FLORIDA_COUNTIES[0]);
     const [permitType, setPermitType] = useState(PERMIT_TYPES[0]);
-    const [contractorId, setContractorId] = useState('');
+    const [contractorLicense, setContractorLicense] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
 
     const handleSubmit = async (e) => {
@@ -240,7 +240,7 @@ const CreatePackageModal = ({ isOpen, onClose, onPackageCreate, contractors }) =
                 propertyAddress,
                 county,
                 permitType,
-                contractorId: contractorId || null,
+                contractorLicense: contractorLicense || null,
             };
             await onPackageCreate(newPackageData);
             
@@ -248,7 +248,7 @@ const CreatePackageModal = ({ isOpen, onClose, onPackageCreate, contractors }) =
             setPropertyAddress('');
             setCounty(FLORIDA_COUNTIES[0]);
             setPermitType(PERMIT_TYPES[0]);
-            setContractorId('');
+            setContractorLicense('');
             onClose();
         } catch (error) {
             console.error("Failed to create package:", error);
@@ -283,11 +283,11 @@ const CreatePackageModal = ({ isOpen, onClose, onPackageCreate, contractors }) =
                     </Select>
                 </div>
                 <div className="space-y-1">
-                    <Label htmlFor="contractorId">Primary Contractor (Optional)</Label>
-                    <Select id="contractorId" value={contractorId} onChange={e => setContractorId(e.target.value)}>
+                    <Label htmlFor="contractorLicense">Primary Contractor (Optional)</Label>
+                    <Select id="contractorLicense" value={contractorLicense} onChange={e => setContractorLicense(e.target.value)}>
                         <option value="">Select Contractor</option>
                         {contractors.map(contractor => (
-                            <option key={contractor.id} value={contractor.id}>
+                            <option key={contractor.licenseNumber} value={contractor.licenseNumber}>
                                 {contractor.companyName} - {contractor.licenseNumber}
                             </option>
                         ))}
@@ -620,10 +620,10 @@ const App = () => {
     }
   };
 
-  const handleAssignContractor = async (packageId, contractorId) => {
+  const handleAssignContractor = async (packageId, contractorLicense) => {
     try {
       const updatedPackage = await api.put(`/api/permits/${packageId}/contractor`, {
-        contractorId
+        contractorLicense
       });
       
       // Update the packages list with the new contractor assignment
@@ -1093,11 +1093,11 @@ const App = () => {
                                                 <p className="text-sm text-gray-600">License: {contractor.licenseNumber}</p>
                                                 <p className="text-xs text-gray-500">{contractor.address}</p>
                                             </div>
-                                            <Button 
-                                                onClick={() => {
-                                                    handleAssignContractor(selectedPackage.id, contractor.id);
-                                                    setContractorSelectionModalOpen(false);
-                                                }}
+                                                                                          <Button 
+                                                  onClick={() => {
+                                                      handleAssignContractor(selectedPackage.id, contractor.licenseNumber);
+                                                      setContractorSelectionModalOpen(false);
+                                                  }}
                                                 size="sm"
                                                 variant="outline"
                                             >
