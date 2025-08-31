@@ -15,10 +15,17 @@ const corsOptions = {
 app.use(cors(corsOptions));
 app.use(express.json());
 
+// Ensure uploads directory exists
+const fs = require('fs');
+const uploadsDir = 'uploads';
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
 // Configure multer for file uploads with better file naming
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/');
+    cb(null, uploadsDir + '/');
   },
   filename: (req, file, cb) => {
     // Preserve file extension and add timestamp for uniqueness
@@ -31,7 +38,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 // Serve static files from uploads directory
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, uploadsDir)));
 
 // Auth
 app.post('/api/auth/login', async (req, res) => {
