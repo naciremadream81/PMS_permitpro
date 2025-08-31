@@ -1,14 +1,42 @@
 {
-  "name": "permitpro-monorepo",
+  "name": "permitpro",
   "version": "1.0.0",
+  "description": "PermitPro - Permit Management System",
+  "main": "server.js",
+  "private": true,
+  "workspaces": [
+    "permitpro-backend",
+    "permitpro-frontend"
+  ],
   "scripts": {
-    "start": "concurrently \"npm start --prefix permitpro-backend\" \"npm start --prefix permitpro-frontend\""
+    "start": "cd permitpro-backend && bun run start",
+    "dev": "cd permitpro-backend && bun run dev",
+    "build": "cd permitpro-backend && bun run build",
+    "db:migrate": "cd permitpro-backend && bun run db:migrate",
+    "db:migrate:dev": "cd permitpro-backend && bun run db:migrate:dev",
+    "db:generate": "cd permitpro-backend && bun run db:generate",
+    "db:seed": "cd permitpro-backend && bun run db:seed",
+    "db:push": "cd permitpro-backend && bun run db:push",
+    "db:studio": "cd permitpro-backend && bun run db:studio",
+    "docker:build": "cd permitpro-backend && bun run docker:build",
+    "docker:run": "cd permitpro-backend && bun run docker:run",
+    "frontend:dev": "cd permitpro-frontend && bun run dev",
+    "frontend:build": "cd permitpro-frontend && bun run build",
+    "frontend:start": "cd permitpro-frontend && bun run start"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "multer": "^1.4.5-lts.1",
+    "@prisma/client": "^5.7.0"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2",
+    "prisma": "^5.7.0",
     "@types/bun": "latest"
   },
-  "private": true,
+  "prisma": {
+    "seed": "node seed.js"
+  },
   "peerDependencies": {
     "typescript": "^5"
   }

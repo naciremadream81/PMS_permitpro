@@ -72,3 +72,6 @@ permitpro-frontend/
 
 # Exclude extra files
 extra/
+
+# Exclude backend subdirectory since we're copying files to root
+permitpro-backend/
