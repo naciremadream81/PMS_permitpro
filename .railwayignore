@@ -1,0 +1,18 @@
+# Ignore old Railway configuration files
+permitpro-backend/.railway/
+permitpro-backend/railway.json
+permitpro-backend/nixpacks.toml
+permitpro-backend/Procfile
+
+# Ignore frontend files for backend deployment
+permitpro-frontend/
+
+# Ignore extra files
+extra/
+
+# Ignore development files
+.env
+.env.local
+.env.development
+.env.test
+.env.production
