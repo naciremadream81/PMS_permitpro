@@ -33,5 +33,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD bun run db:generate > /dev/null 2>&1 || exit 1
 
-# Start the application
-CMD ["bun", "run", "start"]
+# Start the application with migrations
+CMD ["sh", "-c", "bun run db:migrate && bun run start"]
