@@ -85,9 +85,12 @@ permitpro/
 
 ### Backend (`permitpro-backend/`)
 - `bun run dev` - Start backend server
-- `bun run db:migrate` - Run database migrations
+- `bun run db:migrate` - Apply production migrations
+- `bun run db:migrate:dev` - Create new migrations (development)
 - `bun run db:seed` - Seed the database
 - `bun run db:generate` - Generate Prisma client
+- `bun run db:push` - Push schema changes directly (development)
+- `bun run db:studio` - Open Prisma Studio
 
 ### Frontend (`permitpro-frontend/`)
 - `bun start` - Start development server
