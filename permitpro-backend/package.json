@@ -1,12 +1,12 @@
 {
   "name": "permitpro-backend",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "PermitPro Backend API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "build": "bun run db:generate",
+    "build": "echo 'Building...' && bun run db:generate && echo 'Build complete'",
     "db:migrate": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
     "db:generate": "prisma generate",
