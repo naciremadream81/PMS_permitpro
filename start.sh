@@ -8,17 +8,17 @@ sleep 10
 
 # Run database migrations
 echo "🗄️ Running database migrations..."
-npx prisma migrate deploy || {
+bun run prisma migrate deploy || {
     echo "❌ Migration failed, trying to generate client first..."
-    npx prisma generate
-    npx prisma migrate deploy
+    bun run prisma generate
+    bun run prisma migrate deploy
 }
 
 echo "✅ Database migrations completed!"
 
 # Generate Prisma client
 echo "🔧 Generating Prisma client..."
-npx prisma generate
+bun run prisma generate
 
 # Start the application
 echo "🚀 Starting backend server..."
