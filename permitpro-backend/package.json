@@ -1,6 +1,6 @@
 {
   "name": "permitpro-backend",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "PermitPro Backend API",
   "main": "server.js",
   "scripts": {
@@ -13,7 +13,8 @@
     "db:seed": "node seed.js",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "postinstall": "prisma generate"
+    "docker:build": "docker build -t permitpro-backend .",
+    "docker:run": "docker run -p 8000:8000 permitpro-backend"
   },
   "dependencies": {
     "express": "^4.18.2",
