@@ -1,8 +1,10 @@
-# Use Bun base image with OpenSSL
-FROM oven/bun:1 AS base
+# Use Bun base image
+FROM oven/bun:1
+
+# Set working directory
 WORKDIR /app
 
-# Install system dependencies in a single layer
+# Install system dependencies
 RUN apt-get update -y && \
     apt-get install -y --no-install-recommends \
         openssl \
@@ -10,28 +12,24 @@ RUN apt-get update -y && \
     rm -rf /var/lib/apt/lists/* && \
     apt-get clean
 
-# Copy package files for dependency caching
+# Copy package files
 COPY package.json bun.lock ./
 
-# Copy Prisma schema files before installing dependencies
+# Copy Prisma schema
 COPY prisma/ ./prisma/
 
-# Install dependencies (Prisma client will be generated automatically)
+# Install dependencies
 RUN bun install --frozen-lockfile
 
-# Copy application source code (all files are now at root)
+# Copy application code
 COPY . .
 
-# Create necessary directories
-RUN mkdir -p uploads && \
-    chmod 755 uploads
+# Create uploads directory and make startup script executable
+RUN mkdir -p uploads && chmod 755 uploads && \
+    chmod +x start.sh
 
 # Expose port
 EXPOSE 8000
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-    CMD bun run db:generate > /dev/null 2>&1 || exit 1
-
-# Start the application with migrations
-CMD ["sh", "-c", "bun run db:migrate && bun run start"]
+# Start command using the startup script
+CMD ["./start.sh"]

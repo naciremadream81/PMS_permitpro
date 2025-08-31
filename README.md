@@ -1,149 +1,188 @@
-# PermitPro - Permit Management System
+# 🚀 PermitPro - Permit Management System
 
-A comprehensive permit management system built with a modern web stack.
+A comprehensive permit management system built with Express.js, Prisma, and PostgreSQL.
 
-## Project Structure
+## 🎯 **Deployment Options**
 
-```
-permitpro/
-├── permitpro-backend/     # Backend API server
-├── permitpro-frontend/    # Frontend React application
-├── package.json           # Monorepo configuration
-└── README.md             # This file
-```
+### **1. 🏠 Local Development (Recommended for now)**
+- **Quick start**: Run `./deploy.sh` for local Docker setup
+- **Perfect for**: Development, testing, learning
+- **Cost**: Free (just your local machine)
 
-## Quick Start
+### **2. 🌐 Linode VPS**
+- **Cost**: Starting at $10/month
+- **Perfect for**: Production, small to medium businesses
+- **Guide**: See `LINODE_DEPLOYMENT.md`
 
-### Prerequisites
-- [Bun](https://bun.sh/) (recommended) or Node.js
-- PostgreSQL database
+### **3. ☁️ Google Cloud Platform**
+- **Cost**: Pay-as-you-use (very affordable for small apps)
+- **Perfect for**: Production, scalable applications
+- **Guide**: See `GOOGLE_CLOUD_DEPLOYMENT.md`
 
-### Installation
+## 🚀 **Quick Start (Local Development)**
 
-1. **Clone the repository**
-   ```bash
-   git clone <your-repo-url>
-   cd permitpro
-   ```
+### **Prerequisites**
+- Docker and Docker Compose installed
+- Git
 
-2. **Install dependencies**
-   ```bash
-   # Install root dependencies
-   bun install
-   
-   # Install backend dependencies
-   cd permitpro-backend
-   bun install
-   
-   # Install frontend dependencies
-   cd ../permitpro-frontend
-   bun install
-   ```
-
-3. **Set up the database**
-   ```bash
-   cd ../permitpro-backend
-   
-   # Set your DATABASE_URL in .env
-   echo "DATABASE_URL=postgresql://username:password@localhost:5432/permitpro" > .env
-   
-   # Run database migrations
-   bun run db:migrate
-   
-   # Seed the database (optional)
-   bun run db:seed
-   ```
-
-4. **Start the development servers**
-   ```bash
-   # From the root directory
-   bun start
-   ```
-
-   This will start both:
-   - Backend: http://localhost:8000
-   - Frontend: http://localhost:3000
-
-## Development
-
-### Backend
-- **Location**: `permitpro-backend/`
-- **Framework**: Express.js with Prisma ORM
-- **Database**: PostgreSQL
-- **Key Features**: REST API, file uploads, JWT authentication
-
-### Frontend
-- **Location**: `permitpro-frontend/`
-- **Framework**: React with Webpack
-- **Styling**: Tailwind CSS
-- **Key Features**: Permit management, contractor management, checklist system
-
-## Available Scripts
-
-### Root Directory
-- `bun start` - Start both backend and frontend in development mode
-
-### Backend (`permitpro-backend/`)
-- `bun run dev` - Start backend server
-- `bun run db:migrate` - Apply production migrations
-- `bun run db:migrate:dev` - Create new migrations (development)
-- `bun run db:seed` - Seed the database
-- `bun run db:generate` - Generate Prisma client
-- `bun run db:push` - Push schema changes directly (development)
-- `bun run db:studio` - Open Prisma Studio
-
-### Frontend (`permitpro-frontend/`)
-- `bun start` - Start development server
-- `bun run build` - Build for production
-
-## Environment Variables
-
-### Backend (`.env`)
+### **One-Command Setup**
 ```bash
-DATABASE_URL=postgresql://username:password@localhost:5432/permitpro
-JWT_SECRET=your-secret-key
-PORT=8000
-NODE_ENV=development
-CORS_ORIGIN=http://localhost:3000
+# Clone the repository
+git clone https://github.com/yourusername/PMS_permitpro.git
+cd PMS_permitpro
+
+# Deploy locally with one command
+./deploy.sh
 ```
 
-### Frontend (`.env`)
+### **Manual Setup**
 ```bash
-REACT_APP_API_URL=http://localhost:8000
+# Build and start services
+docker-compose up --build -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
 ```
 
-## Database Schema
+## 🌐 **Access Points (Local)**
 
-The application uses Prisma with the following main entities:
-- **Permits**: Main permit records
-- **Contractors**: Contractor information
-- **Subcontractors**: Subcontractor assignments
-- **Documents**: File uploads and attachments
+- **Backend API**: http://localhost:8000
+- **Database**: localhost:5432
+- **API Endpoints**:
+  - `GET /api/permits` - List all permits
+  - `POST /api/auth/login` - User authentication
+  - `POST /api/permits` - Create new permit
+  - `GET /api/permits/:id` - Get specific permit
 
-## API Endpoints
+## 🗄️ **Database (Local)**
 
-- `GET /api/permits` - List all permits
-- `POST /api/permits` - Create new permit
-- `GET /api/permits/:id` - Get specific permit
-- `PUT /api/permits/:id` - Update permit
-- `DELETE /api/permits/:id` - Delete permit
-- `POST /api/upload` - Upload documents
+- **Host**: localhost
+- **Port**: 5432
+- **Database**: permitpro
+- **Username**: postgres
+- **Password**: password123
 
-## Deployment
+## 🔧 **Configuration**
 
-For deployment instructions, see the documentation in the `extra/` folder:
-- Railway deployment guide
-- AWS deployment guide
-- Quick start guides
+### **Local Development**
+- Edit `local.env` for environment variables
+- Edit `docker-compose.yml` for Docker settings
+- Edit `Dockerfile` for container configuration
 
-## Contributing
+### **Production Deployment**
+- Use `production.env.example` as template
+- Use `docker-compose.production.yml` for production
+- See deployment guides for specific platforms
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
+## 📁 **Project Structure**
 
-## License
+```
+.
+├── docker-compose.yml              # Local development
+├── docker-compose.production.yml   # Production deployment
+├── Dockerfile                      # Container definition
+├── start.sh                        # Startup script
+├── deploy.sh                       # Local deployment script
+├── deploy-linode.sh                # Linode deployment script
+├── local.env                       # Local environment variables
+├── production.env.example          # Production environment template
+├── package.json                    # Dependencies and scripts
+├── server.js                       # Main application
+├── prisma/                         # Database schema and migrations
+├── uploads/                        # File upload directory
+├── README.md                       # This file
+├── DOCKER_README.md                # Local Docker setup guide
+├── LINODE_DEPLOYMENT.md            # Linode deployment guide
+└── GOOGLE_CLOUD_DEPLOYMENT.md     # Google Cloud deployment guide
+```
 
-[Your License Here]
+## 🛠️ **Development Commands**
+
+### **Local Development (without Docker)**
+```bash
+# Install dependencies
+bun install
+
+# Set up database
+bun run db:migrate
+
+# Start development server
+bun run dev
+```
+
+### **Docker Development**
+```bash
+# Development mode with logs
+docker-compose up --build
+
+# Production mode (detached)
+docker-compose up --build -d
+
+# View logs
+docker-compose logs -f backend
+```
+
+## 🔍 **Troubleshooting**
+
+### **Common Issues**
+
+1. **Port already in use**
+   ```bash
+   # Check what's using port 8000
+   lsof -i :8000
+   
+   # Kill the process or change port in docker-compose.yml
+   ```
+
+2. **Database connection failed**
+   ```bash
+   # Check if PostgreSQL is running
+   docker-compose ps postgres
+   
+   # View database logs
+   docker-compose logs postgres
+   ```
+
+3. **Permission denied on scripts**
+   ```bash
+   chmod +x *.sh
+   ```
+
+### **Reset Everything**
+```bash
+# Stop and remove all containers, networks, and volumes
+docker-compose down -v
+
+# Remove all images
+docker-compose down --rmi all
+
+# Start fresh
+./deploy.sh
+```
+
+## 🚀 **Next Steps**
+
+### **For Local Development**
+1. ✅ **You're all set!** Run `./deploy.sh` to start
+2. Test your API endpoints
+3. Develop and iterate locally
+4. Use `docker-compose logs -f` to monitor
+
+### **For Production Deployment**
+1. Choose your platform (Linode, Google Cloud, etc.)
+2. Follow the specific deployment guide
+3. Set up SSL/TLS and domain
+4. Configure backups and monitoring
+
+## 📚 **Documentation**
+
+- **`DOCKER_README.md`** - Comprehensive local Docker setup
+- **`LINODE_DEPLOYMENT.md`** - Deploy on Linode VPS
+- **`GOOGLE_CLOUD_DEPLOYMENT.md`** - Deploy on Google Cloud
+
+---
+
+**🎉 Ready to get started?** Run `./deploy.sh` for local development, or check out the deployment guides when you're ready for production!
