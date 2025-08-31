@@ -1,6 +1,6 @@
 {
   "name": "permitpro",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "PermitPro - Permit Management System",
   "main": "server.js",
   "private": true,
