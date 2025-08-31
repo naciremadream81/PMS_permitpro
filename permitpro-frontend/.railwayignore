@@ -1,0 +1,37 @@
+# Development files
+node_modules/
+.env.local
+.env.development
+.env.test
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build artifacts (keep dist/ for production)
+# dist/
+build/
+coverage/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git/
+.gitignore
+
+# Documentation
+README.md
+*.md
+
+# Scripts
+deploy-to-railway.sh
+QUICK_START_RAILWAY.md
+RAILWAY_DEPLOYMENT.md

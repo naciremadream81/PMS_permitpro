@@ -14,6 +14,20 @@ async function main() {
     }
   });
 
+  // Create default contractor
+  const defaultContractor = await prisma.contractor.upsert({
+    where: { licenseNumber: 'DEFAULT-001' },
+    update: {},
+    create: {
+      companyName: 'Default Contractor',
+      licenseNumber: 'DEFAULT-001',
+      address: 'Address Not Specified',
+      phoneNumber: 'Phone Not Specified',
+      email: 'default@example.com',
+      contactPerson: 'System Default'
+    }
+  });
+
   // Create sample packages
   const package1 = await prisma.package.create({
     data: {
@@ -21,7 +35,8 @@ async function main() {
       propertyAddress: '123 Main St, Miami, FL',
       county: 'Miami-Dade',
       permitType: 'Mobile Home Permit',
-      status: 'Draft'
+      status: 'Draft',
+      contractorId: defaultContractor.id
     }
   });
 
@@ -31,7 +46,8 @@ async function main() {
       propertyAddress: '456 Oak Ave, Orlando, FL',
       county: 'Orange',
       permitType: 'Modular Home Permit',
-      status: 'Submitted'
+      status: 'Submitted',
+      contractorId: defaultContractor.id
     }
   });
 
@@ -41,7 +57,8 @@ async function main() {
       propertyAddress: '789 Pine St, Tampa, FL',
       county: 'Hillsborough',
       permitType: 'Shed Permit',
-      status: 'Completed'
+      status: 'Completed',
+      contractorId: defaultContractor.id
     }
   });
 

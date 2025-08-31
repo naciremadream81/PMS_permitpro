@@ -25,10 +25,22 @@ export const ContractorManagementModal = ({ isOpen, onClose, onContractorCreate,
     try {
       setIsLoading(true);
       const response = await fetch('/api/contractors');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
-      setContractors(data);
+      
+      if (Array.isArray(data)) {
+        setContractors(data);
+      } else {
+        console.error('Invalid contractors data:', data);
+        setContractors([]);
+      }
     } catch (error) {
       console.error('Failed to fetch contractors:', error);
+      setContractors([]);
     } finally {
       setIsLoading(false);
     }
@@ -202,6 +214,10 @@ export const ContractorManagementModal = ({ isOpen, onClose, onContractorCreate,
               
               {isLoading ? (
                 <div className="text-center py-4 text-gray-500">Loading contractors...</div>
+              ) : !contractors || !Array.isArray(contractors) ? (
+                <div className="text-center py-4 text-red-500">Error loading contractors. Please try again.</div>
+              ) : contractors.length === 0 ? (
+                <div className="text-center py-4 text-gray-500">No contractors found. Create your first contractor above.</div>
               ) : (
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {contractors.map((contractor) => (
@@ -247,8 +263,8 @@ export const ContractorManagementModal = ({ isOpen, onClose, onContractorCreate,
   );
 };
 
-// Subcontractor Management Modal
-export const SubcontractorManagementModal = ({ isOpen, onClose, contractorId, onSubcontractorCreate, onSubcontractorUpdate, onSubcontractorDelete }) => {
+// Global Subcontractor Management Modal
+export const SubcontractorManagementModal = ({ isOpen, onClose, onSubcontractorCreate, onSubcontractorUpdate, onSubcontractorDelete }) => {
   const [subcontractors, setSubcontractors] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedSubcontractor, setSelectedSubcontractor] = useState(null);
@@ -270,19 +286,31 @@ export const SubcontractorManagementModal = ({ isOpen, onClose, contractorId, on
   ];
 
   useEffect(() => {
-    if (isOpen && contractorId) {
+    if (isOpen) {
       fetchSubcontractors();
     }
-  }, [isOpen, contractorId]);
+  }, [isOpen]);
 
   const fetchSubcontractors = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`/api/contractors/${contractorId}/subcontractors`);
+      const response = await fetch('/api/subcontractors');
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
-      setSubcontractors(data);
+      
+      if (Array.isArray(data)) {
+        setSubcontractors(data);
+      } else {
+        console.error('Invalid subcontractors data:', data);
+        setSubcontractors([]);
+      }
     } catch (error) {
       console.error('Failed to fetch subcontractors:', error);
+      setSubcontractors([]);
     } finally {
       setIsLoading(false);
     }
@@ -295,7 +323,7 @@ export const SubcontractorManagementModal = ({ isOpen, onClose, contractorId, on
       if (isEditMode && selectedSubcontractor) {
         await onSubcontractorUpdate(selectedSubcontractor.id, formData);
       } else {
-        await onSubcontractorCreate(contractorId, formData);
+        await onSubcontractorCreate(formData);
       }
       
       resetForm();
@@ -470,6 +498,10 @@ export const SubcontractorManagementModal = ({ isOpen, onClose, contractorId, on
               
               {isLoading ? (
                 <div className="text-center py-4 text-gray-500">Loading subcontractors...</div>
+              ) : !subcontractors || !Array.isArray(subcontractors) ? (
+                <div className="text-center py-4 text-red-500">Error loading subcontractors. Please try again.</div>
+              ) : subcontractors.length === 0 ? (
+                <div className="text-center py-4 text-gray-500">No subcontractors found. Create your first subcontractor above.</div>
               ) : (
                 <div className="space-y-2 max-h-96 overflow-y-auto">
                   {subcontractors.map((subcontractor) => (

@@ -81,6 +81,33 @@ app.get('/api/permits', async (req, res) => {
   }
 });
 
+app.get('/api/permits/:id', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const package = await prisma.package.findUnique({
+      where: { id },
+      include: {
+        documents: true,
+        contractor: true,
+        subcontractors: {
+          include: {
+            subcontractor: true
+          }
+        }
+      }
+    });
+    
+    if (!package) {
+      return res.status(404).json({ error: 'Package not found' });
+    }
+    
+    res.json(package);
+  } catch (error) {
+    console.error('Get package error:', error);
+    res.status(500).json({ error: 'Failed to fetch package' });
+  }
+});
+
 app.post('/api/permits', async (req, res) => {
   try {
     const { customerName, propertyAddress, county, permitType, contractorId } = req.body;
@@ -166,7 +193,6 @@ app.get('/api/contractors', async (req, res) => {
   try {
     const contractors = await prisma.contractor.findMany({
       include: {
-        subcontractors: true,
         packages: {
           select: {
             id: true,
@@ -222,15 +248,29 @@ app.put('/api/contractors/:id', async (req, res) => {
   }
 });
 
-// Subcontractor Management Endpoints
-app.get('/api/contractors/:id/subcontractors', async (req, res) => {
+// Global Subcontractor Management Endpoints
+app.get('/api/subcontractors', async (req, res) => {
   try {
-    const contractorId = parseInt(req.params.id);
-    
     const subcontractors = await prisma.subcontractor.findMany({
-      where: { contractorId }
+      include: {
+        packages: {
+          include: {
+            package: {
+              select: {
+                id: true,
+                customerName: true,
+                status: true,
+                contractor: {
+                  select: {
+                    companyName: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     });
-    
     res.json(subcontractors);
   } catch (error) {
     console.error('Get subcontractors error:', error);
@@ -238,9 +278,8 @@ app.get('/api/contractors/:id/subcontractors', async (req, res) => {
   }
 });
 
-app.post('/api/contractors/:id/subcontractors', async (req, res) => {
+app.post('/api/subcontractors', async (req, res) => {
   try {
-    const contractorId = parseInt(req.params.id);
     const { companyName, licenseNumber, address, phoneNumber, email, contactPerson, tradeType } = req.body;
     
     const newSubcontractor = await prisma.subcontractor.create({
@@ -251,8 +290,7 @@ app.post('/api/contractors/:id/subcontractors', async (req, res) => {
         phoneNumber,
         email,
         contactPerson,
-        tradeType,
-        contractorId
+        tradeType
       }
     });
     
@@ -277,6 +315,33 @@ app.put('/api/subcontractors/:id', async (req, res) => {
   } catch (error) {
     console.error('Update subcontractor error:', error);
     res.status(500).json({ error: 'Failed to update subcontractor' });
+  }
+});
+
+// Package Contractor Assignment
+app.put('/api/permits/:id/contractor', async (req, res) => {
+  try {
+    const packageId = parseInt(req.params.id);
+    const { contractorId } = req.body;
+    
+    const updatedPackage = await prisma.package.update({
+      where: { id: packageId },
+      data: { contractorId: parseInt(contractorId) },
+      include: {
+        documents: true,
+        contractor: true,
+        subcontractors: {
+          include: {
+            subcontractor: true
+          }
+        }
+      }
+    });
+    
+    res.json(updatedPackage);
+  } catch (error) {
+    console.error('Assign contractor error:', error);
+    res.status(500).json({ error: 'Failed to assign contractor' });
   }
 });
 
@@ -322,10 +387,60 @@ app.delete('/api/permits/:id/subcontractors/:subcontractorId', async (req, res) 
   }
 });
 
+// Bulk reassign packages to a different contractor
+app.put('/api/contractors/:id/reassign-packages', async (req, res) => {
+  try {
+    const oldContractorId = parseInt(req.params.id);
+    const { newContractorId } = req.body;
+    
+    if (!newContractorId) {
+      return res.status(400).json({ error: 'New contractor ID is required' });
+    }
+    
+    // Verify the new contractor exists
+    const newContractor = await prisma.contractor.findUnique({
+      where: { id: newContractorId }
+    });
+    
+    if (!newContractor) {
+      return res.status(404).json({ error: 'New contractor not found' });
+    }
+    
+    // Reassign all packages from old contractor to new contractor
+    const updatedPackages = await prisma.package.updateMany({
+      where: { contractorId: oldContractorId },
+      data: { contractorId: newContractorId }
+    });
+    
+    res.json({ 
+      message: `Successfully reassigned ${updatedPackages.count} package(s) to ${newContractor.companyName}`,
+      reassignedCount: updatedPackages.count,
+      newContractorName: newContractor.companyName
+    });
+  } catch (error) {
+    console.error('Reassign packages error:', error);
+    res.status(500).json({ error: 'Failed to reassign packages' });
+  }
+});
+
 // Delete contractor endpoint
 app.delete('/api/contractors/:id', async (req, res) => {
   try {
     const id = parseInt(req.params.id);
+    
+    // Check if contractor has any packages assigned
+    const packagesWithContractor = await prisma.package.findMany({
+      where: { contractorId: id }
+    });
+    
+    if (packagesWithContractor.length > 0) {
+      return res.status(400).json({ 
+        error: 'Cannot delete contractor with assigned packages',
+        message: `This contractor has ${packagesWithContractor.length} package(s) assigned. Please reassign or remove the packages first.`,
+        packageCount: packagesWithContractor.length,
+        packages: packagesWithContractor.map(p => ({ id: p.id, customerName: p.customerName }))
+      });
+    }
     
     await prisma.contractor.delete({
       where: { id }

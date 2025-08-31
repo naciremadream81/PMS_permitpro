@@ -17,6 +17,14 @@
     "@prisma/client": "^5.7.0"
   },
   "devDependencies": {
-    "prisma": "^5.7.0"
+    "prisma": "^5.7.0",
+    "@types/bun": "latest"
+  },
+  "private": true,
+  "prisma": {
+    "seed": "node seed.js"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
   }
 }

@@ -4,16 +4,20 @@ import JSZip from 'jszip';
 import './styles.css';
 import ChecklistManagementModal from './checklist-system';
 import { ContractorManagementModal, SubcontractorManagementModal } from './contractor-management';
+import { SubcontractorAssignmentModal } from './subcontractor-assignment-modal';
 
 // --- API HELPERS ---
+// Get API base URL from environment variable or default to localhost
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+
 const api = {
   get: async (url) => {
-    const response = await fetch(url);
+    const response = await fetch(`${API_BASE_URL}${url}`);
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
     return response.json();
   },
   post: async (url, data) => {
-    const response = await fetch(url, {
+    const response = await fetch(`${API_BASE_URL}${url}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data),
@@ -22,7 +26,7 @@ const api = {
     return response.json();
   },
   put: async (url, data) => {
-    const response = await fetch(url, {
+    const response = await fetch(`${API_BASE_URL}${url}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data),
@@ -31,7 +35,7 @@ const api = {
     return response.json();
   },
   postFormData: async (url, formData) => {
-    const response = await fetch(url, {
+    const response = await fetch(`${API_BASE_URL}${url}`, {
         method: 'POST',
         body: formData,
     });
@@ -39,7 +43,7 @@ const api = {
     return response.json();
   },
   delete: async (url) => {
-    const response = await fetch(url, {
+    const response = await fetch(`${API_BASE_URL}${url}`, {
         method: 'DELETE',
     });
     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
@@ -219,30 +223,13 @@ const LoginPage = ({ onLogin }) => {
   );
 };
 
-const CreatePackageModal = ({ isOpen, onClose, onPackageCreate }) => {
+const CreatePackageModal = ({ isOpen, onClose, onPackageCreate, contractors }) => {
     const [customerName, setCustomerName] = useState('');
     const [propertyAddress, setPropertyAddress] = useState('');
     const [county, setCounty] = useState(FLORIDA_COUNTIES[0]);
     const [permitType, setPermitType] = useState(PERMIT_TYPES[0]);
     const [contractorId, setContractorId] = useState('');
-    const [contractors, setContractors] = useState([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    useEffect(() => {
-        if (isOpen) {
-            fetchContractors();
-        }
-    }, [isOpen]);
-
-    const fetchContractors = async () => {
-        try {
-            const response = await fetch('/api/contractors');
-            const data = await response.json();
-            setContractors(data);
-        } catch (error) {
-            console.error('Failed to fetch contractors:', error);
-        }
-    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -432,6 +419,10 @@ const App = () => {
   const [isCreateModalOpen, setCreateModalOpen] = useState(false);
   const [isChecklistModalOpen, setChecklistModalOpen] = useState(false);
   const [isContractorModalOpen, setContractorModalOpen] = useState(false);
+  const [isSubcontractorModalOpen, setSubcontractorModalOpen] = useState(false);
+  const [isSubcontractorAssignmentModalOpen, setSubcontractorAssignmentModalOpen] = useState(false);
+  const [isContractorSelectionModalOpen, setContractorSelectionModalOpen] = useState(false);
+  const [contractors, setContractors] = useState([]);
 
   const fetchPackages = async () => {
     try {
@@ -446,9 +437,19 @@ const App = () => {
     }
   };
 
+  const fetchContractors = async () => {
+    try {
+      const data = await api.get('/api/contractors');
+      setContractors(data);
+    } catch (err) {
+      console.error('Failed to load contractors:', err);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchPackages();
+      fetchContractors();
     }
   }, [user]);
 
@@ -499,9 +500,9 @@ const App = () => {
     }
   };
 
-  const handleSubcontractorCreate = async (contractorId, subcontractorData) => {
+  const handleSubcontractorCreate = async (subcontractorData) => {
     try {
-      await api.post(`/api/contractors/${contractorId}/subcontractors`, subcontractorData);
+      await api.post(`/api/subcontractors`, subcontractorData);
     } catch (error) {
       console.error("Failed to create subcontractor:", error);
       throw error;
@@ -520,8 +521,65 @@ const App = () => {
   const handleContractorDelete = async (contractorId) => {
     try {
       await api.delete(`/api/contractors/${contractorId}`);
+      
+      // Refresh contractors list after successful deletion
+      fetchContractors();
     } catch (error) {
       console.error("Failed to delete contractor:", error);
+      
+      // Handle specific error for contractors with assigned packages
+      if (error.message && error.message.includes('Cannot delete contractor with assigned packages')) {
+        const errorData = error.response?.data || {};
+        const packageCount = errorData.packageCount || 0;
+        
+        if (packageCount > 0) {
+          const reassign = confirm(
+            `${errorData.message}\n\nWould you like to reassign all packages to a different contractor before deletion?`
+          );
+          
+          if (reassign) {
+            // Show contractor selection for reassignment
+            const newContractorId = prompt(
+              `Enter the ID of the contractor to reassign ${packageCount} package(s) to:\n\nAvailable contractors:\n${contractors
+                .filter(c => c.id !== contractorId)
+                .map(c => `${c.id}: ${c.companyName}`)
+                .join('\n')}`
+            );
+            
+            if (newContractorId && newContractorId.trim()) {
+              try {
+                await handleReassignPackages(contractorId, parseInt(newContractorId.trim()));
+                // Now try to delete the contractor again
+                await api.delete(`/api/contractors/${contractorId}`);
+                fetchContractors();
+                fetchPackages(); // Refresh packages to show updated assignments
+                alert('Packages reassigned and contractor deleted successfully!');
+              } catch (reassignError) {
+                console.error("Failed to reassign packages:", reassignError);
+                alert('Failed to reassign packages. Contractor not deleted.');
+              }
+            }
+          }
+        } else {
+          alert(`Cannot delete this contractor: ${errorData.message}`);
+        }
+      } else {
+        alert('Failed to delete contractor. Please try again.');
+      }
+      
+      throw error;
+    }
+  };
+
+  const handleReassignPackages = async (oldContractorId, newContractorId) => {
+    try {
+      const response = await api.put(`/api/contractors/${oldContractorId}/reassign-packages`, {
+        newContractorId
+      });
+      
+      return response;
+    } catch (error) {
+      console.error("Failed to reassign packages:", error);
       throw error;
     }
   };
@@ -531,6 +589,54 @@ const App = () => {
       await api.delete(`/api/subcontractors/${subcontractorId}`);
     } catch (error) {
       console.error("Failed to delete subcontractor:", error);
+      throw error;
+    }
+  };
+
+  const handleAssignSubcontractor = async (packageId, subcontractorId, tradeType) => {
+    try {
+      await api.post(`/api/permits/${packageId}/subcontractors`, {
+        subcontractorId: parseInt(subcontractorId),
+        tradeType
+      });
+      
+      // Refresh packages to get updated subcontractor list
+      fetchPackages();
+    } catch (error) {
+      console.error("Failed to assign subcontractor:", error);
+      throw error;
+    }
+  };
+
+  const handleRemoveSubcontractor = async (packageId, subcontractorId) => {
+    try {
+      await api.delete(`/api/permits/${packageId}/subcontractors/${subcontractorId}`);
+      
+      // Refresh packages to get updated subcontractor list
+      fetchPackages();
+    } catch (error) {
+      console.error("Failed to remove subcontractor:", error);
+      throw error;
+    }
+  };
+
+  const handleAssignContractor = async (packageId, contractorId) => {
+    try {
+      const updatedPackage = await api.put(`/api/permits/${packageId}/contractor`, {
+        contractorId
+      });
+      
+      // Update the packages list with the new contractor assignment
+      setPackages(prevPackages => 
+        prevPackages.map(p => p.id === packageId ? updatedPackage : p)
+      );
+      
+      // Update selected package if it's the current one
+      if (selectedPackageId === packageId) {
+        setSelectedPackageId(packageId); // This will trigger a re-fetch
+      }
+    } catch (error) {
+      console.error("Failed to assign contractor:", error);
       throw error;
     }
   };
@@ -561,11 +667,11 @@ const App = () => {
   }, [packages, selectedPackageId]);
 
   // PermitPackageDetails component defined inside App component
-  const PermitPackageDetails = ({ package: permitPackage, onUpdate, onDocumentUpload, onSubcontractorCreate, onSubcontractorUpdate }) => {
+  const PermitPackageDetails = ({ package: permitPackage, onUpdate, onDocumentUpload, onSubcontractorCreate, onSubcontractorUpdate, isSubcontractorAssignmentModalOpen, setSubcontractorAssignmentModalOpen }) => {
     const [isUploadModalOpen, setUploadModalOpen] = useState(false);
     const [isPDFViewerOpen, setPDFViewerOpen] = useState(false);
     const [selectedPDF, setSelectedPDF] = useState(null);
-    const [isSubcontractorModalOpen, setSubcontractorModalOpen] = useState(false);
+
 
     if (!permitPackage) {
         return (
@@ -678,13 +784,22 @@ const App = () => {
                                     <h5 className="font-medium">{permitPackage.contractor.companyName}</h5>
                                     <p className="text-sm text-gray-600">License: {permitPackage.contractor.licenseNumber}</p>
                                 </div>
-                                <Button 
-                                    onClick={() => setSubcontractorModalOpen(true)} 
-                                    size="sm" 
-                                    variant="outline"
-                                >
-                                    Manage Subcontractors
-                                </Button>
+                                <div className="flex gap-2">
+                                    <Button 
+                                        onClick={() => setSubcontractorAssignmentModalOpen(true)} 
+                                        size="sm" 
+                                        variant="outline"
+                                    >
+                                        Manage Package Subcontractors
+                                    </Button>
+                                    <Button 
+                                        onClick={() => setContractorSelectionModalOpen(true)} 
+                                        size="sm" 
+                                        variant="outline"
+                                    >
+                                        Change Contractor
+                                    </Button>
+                                </div>
                             </div>
                             <div className="text-sm text-gray-600 space-y-1">
                                 <p>{permitPackage.contractor.address}</p>
@@ -694,8 +809,18 @@ const App = () => {
                             </div>
                         </div>
                     ) : (
-                        <div className="text-center py-4 text-gray-500 border rounded-lg">
-                            No contractor assigned to this package
+                        <div className="border rounded-lg p-3 bg-yellow-50">
+                            <div className="flex justify-between items-center mb-2">
+                                <span className="text-yellow-800">No contractor assigned to this package</span>
+                                <Button 
+                                    onClick={() => setContractorSelectionModalOpen(true)} 
+                                    size="sm" 
+                                    variant="outline"
+                                    className="bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-200"
+                                >
+                                    Assign Contractor
+                                </Button>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -804,13 +929,13 @@ const App = () => {
                 pdfUrl={selectedPDF?.url}
                 fileName={selectedPDF?.fileName}
             />
-            <SubcontractorManagementModal
-                isOpen={isSubcontractorModalOpen}
-                onClose={() => setSubcontractorModalOpen(false)}
-                contractorId={permitPackage.contractor?.id}
-                onSubcontractorCreate={onSubcontractorCreate}
-                onSubcontractorUpdate={onSubcontractorUpdate}
-                onSubcontractorDelete={handleSubcontractorDelete}
+            <SubcontractorAssignmentModal
+                isOpen={isSubcontractorAssignmentModalOpen}
+                onClose={() => setSubcontractorAssignmentModalOpen(false)}
+                packageId={permitPackage.id}
+                currentSubcontractors={permitPackage.subcontractors || []}
+                onAssignSubcontractor={handleAssignSubcontractor}
+                onRemoveSubcontractor={handleRemoveSubcontractor}
             />
         </Card>
     );
@@ -838,6 +963,10 @@ const App = () => {
             <Button onClick={() => setContractorModalOpen(true)} className="whitespace-nowrap">
               <FileIcon className="w-4 h-4 mr-2" />
               Contractors
+            </Button>
+            <Button onClick={() => setSubcontractorModalOpen(true)} className="whitespace-nowrap">
+              <FileIcon className="w-4 h-4 mr-2" />
+              Global Subcontractors
             </Button>
           </div>
         </div>
@@ -913,6 +1042,8 @@ const App = () => {
               onDocumentUpload={handleDocumentUpload}
               onSubcontractorCreate={handleSubcontractorCreate}
               onSubcontractorUpdate={handleSubcontractorUpdate}
+              isSubcontractorAssignmentModalOpen={isSubcontractorAssignmentModalOpen}
+              setSubcontractorAssignmentModalOpen={setSubcontractorAssignmentModalOpen}
             />
           </div>
         </div>
@@ -920,6 +1051,7 @@ const App = () => {
             isOpen={isCreateModalOpen}
             onClose={() => setCreateModalOpen(false)}
             onPackageCreate={handleCreatePackage}
+            contractors={contractors}
         />
         <ChecklistManagementModal
             isOpen={isChecklistModalOpen}
@@ -932,6 +1064,53 @@ const App = () => {
             onContractorUpdate={handleContractorUpdate}
             onContractorDelete={handleContractorDelete}
         />
+        <SubcontractorManagementModal
+            isOpen={isSubcontractorModalOpen}
+            onClose={() => setSubcontractorModalOpen(false)}
+            onSubcontractorCreate={handleSubcontractorCreate}
+            onSubcontractorUpdate={handleSubcontractorUpdate}
+            onSubcontractorDelete={handleSubcontractorDelete}
+        />
+            
+            {/* Contractor Selection Modal */}
+            {isContractorSelectionModalOpen && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                    <div className="bg-white rounded-lg shadow-xl w-96 max-h-96 flex flex-col">
+                        <div className="flex items-center justify-between p-4 border-b">
+                            <h3 className="text-lg font-semibold">Select Contractor</h3>
+                            <button onClick={() => setContractorSelectionModalOpen(false)} className="text-gray-500 hover:text-gray-700">
+                                ✕
+                            </button>
+                        </div>
+                        
+                        <div className="flex-1 p-4 overflow-auto">
+                            <div className="space-y-2">
+                                {contractors.map((contractor) => (
+                                    <div key={contractor.id} className="border rounded-lg p-3 hover:bg-gray-50 cursor-pointer">
+                                        <div className="flex justify-between items-center">
+                                            <div>
+                                                <h5 className="font-medium">{contractor.companyName}</h5>
+                                                <p className="text-sm text-gray-600">License: {contractor.licenseNumber}</p>
+                                                <p className="text-xs text-gray-500">{contractor.address}</p>
+                                            </div>
+                                            <Button 
+                                                onClick={() => {
+                                                    handleAssignContractor(selectedPackage.id, contractor.id);
+                                                    setContractorSelectionModalOpen(false);
+                                                }}
+                                                size="sm"
+                                                variant="outline"
+                                            >
+                                                Select
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
       </main>
     </div>
   );
