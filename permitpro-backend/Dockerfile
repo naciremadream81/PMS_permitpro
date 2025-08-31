@@ -11,16 +11,16 @@ RUN apt-get update -y && \
     apt-get clean
 
 # Copy package files for dependency caching
-COPY package.json bun.lock ./
+COPY permitpro-backend/package.json permitpro-backend/bun.lock ./
 
 # Copy Prisma schema files before installing dependencies
-COPY prisma/ ./prisma/
+COPY permitpro-backend/prisma/ ./prisma/
 
 # Install dependencies (Prisma client will be generated automatically)
 RUN bun install --frozen-lockfile
 
 # Copy application source code
-COPY . .
+COPY permitpro-backend/ .
 
 # Create necessary directories
 RUN mkdir -p uploads && \
