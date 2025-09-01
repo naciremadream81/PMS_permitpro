@@ -7,6 +7,92 @@ const path = require('path'); // Added for path.extname
 const app = express();
 const prisma = new PrismaClient();
 
+// Default checklist items for each permit type
+const DEFAULT_CHECKLIST_ITEMS = {
+  "Mobile Home Permit": [
+    "Site Plan",
+    "Foundation Design", 
+    "Manufacturer's Installation Instructions",
+    "Electrical Permit",
+    "Plumbing Permit",
+    "HVAC Permit",
+    "Soil Test Report",
+    "Flood Zone Determination",
+    "Property Survey",
+    "Building Code Compliance Certificate"
+  ],
+  "Modular Home Permit": [
+    "Site Plan",
+    "Foundation Design",
+    "Modular Unit Specifications",
+    "Electrical Permit", 
+    "Plumbing Permit",
+    "HVAC Permit",
+    "Soil Test Report",
+    "Flood Zone Determination",
+    "Property Survey",
+    "State Modular Program Approval",
+    "Building Code Compliance Certificate"
+  ],
+  "Shed Permit": [
+    "Site Plan",
+    "Shed Design/Specifications",
+    "Property Survey",
+    "Flood Zone Determination",
+    "Electrical Permit (if applicable)",
+    "Plumbing Permit (if applicable)"
+  ]
+};
+
+// Helper function to create package checklist
+async function createPackageChecklist(packageId, county, permitType) {
+  try {
+    // Get or create checklist template
+    let template = await prisma.checklistTemplate.findUnique({
+      where: { county_permitType: { county, permitType } },
+      include: { items: true }
+    });
+
+    if (!template) {
+      // Create template with default items
+      const defaultItems = DEFAULT_CHECKLIST_ITEMS[permitType] || [];
+      template = await prisma.checklistTemplate.create({
+        data: {
+          county,
+          permitType,
+          items: {
+            create: defaultItems.map((item, index) => ({
+              name: item,
+              isRequired: true,
+              isCustom: false,
+              order: index
+            }))
+          }
+        },
+        include: { items: true }
+      });
+    }
+
+    // Create package checklist
+    const packageChecklist = await prisma.packageChecklist.create({
+      data: {
+        packageId,
+        items: {
+          create: template.items.map(item => ({
+            checklistItemId: item.id,
+            isCompleted: false
+          }))
+        }
+      }
+    });
+
+    return packageChecklist;
+  } catch (error) {
+    console.error('Error creating package checklist:', error);
+    throw error;
+  }
+}
+
 // CORS configuration
 const corsOptions = {
   origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
@@ -80,6 +166,20 @@ app.get('/api/permits', async (req, res) => {
           include: {
             subcontractor: true
           }
+        },
+        checklists: {
+          include: {
+            items: {
+              include: {
+                checklistItem: true
+              },
+              orderBy: {
+                checklistItem: {
+                  order: 'asc'
+                }
+              }
+            }
+          }
         }
       },
       orderBy: {
@@ -122,7 +222,7 @@ app.get('/api/permits/:id', async (req, res) => {
 
 app.post('/api/permits', async (req, res) => {
   try {
-    const { customerName, propertyAddress, county, permitType, contractorId } = req.body;
+    const { customerName, propertyAddress, county, permitType, contractorLicense } = req.body;
     
     const newPackage = await prisma.package.create({
       data: {
@@ -131,15 +231,52 @@ app.post('/api/permits', async (req, res) => {
         county,
         permitType,
         status: 'Draft',
-        contractorId: contractorId ? parseInt(contractorId) : null
+        contractorLicense: contractorLicense || null
       },
       include: {
         documents: true,
-        contractor: true
+        contractor: true,
+        checklists: {
+          include: {
+            items: {
+              include: {
+                checklistItem: true
+              }
+            }
+          }
+        }
+      }
+    });
+
+    // Create checklist for the package
+    if (newPackage.id) {
+      await createPackageChecklist(newPackage.id, county, permitType);
+    }
+    
+    // Fetch the complete package with checklist
+    const completePackage = await prisma.package.findUnique({
+      where: { id: newPackage.id },
+      include: {
+        documents: true,
+        contractor: true,
+        checklists: {
+          include: {
+            items: {
+              include: {
+                checklistItem: true
+              },
+              orderBy: {
+                checklistItem: {
+                  order: 'asc'
+                }
+              }
+            }
+          }
+        }
       }
     });
     
-    res.json(newPackage);
+    res.json(completePackage);
   } catch (error) {
     console.error('Create package error:', error);
     res.status(500).json({ error: 'Failed to create package' });
@@ -334,17 +471,31 @@ app.put('/api/subcontractors/:id', async (req, res) => {
 app.put('/api/permits/:id/contractor', async (req, res) => {
   try {
     const packageId = parseInt(req.params.id);
-    const { contractorId } = req.body;
+    const { contractorLicense } = req.body;
     
     const updatedPackage = await prisma.package.update({
       where: { id: packageId },
-      data: { contractorId: parseInt(contractorId) },
+      data: { contractorLicense: contractorLicense },
       include: {
         documents: true,
         contractor: true,
         subcontractors: {
           include: {
             subcontractor: true
+          }
+        },
+        checklists: {
+          include: {
+            items: {
+              include: {
+                checklistItem: true
+              },
+              orderBy: {
+                checklistItem: {
+                  order: 'asc'
+                }
+              }
+            }
           }
         }
       }
@@ -478,6 +629,137 @@ app.delete('/api/subcontractors/:id', async (req, res) => {
   } catch (error) {
     console.error('Delete subcontractor error:', error);
     res.status(500).json({ error: 'Failed to delete subcontractor' });
+  }
+});
+
+// Checklist Management Endpoints
+app.get('/api/checklist-templates', async (req, res) => {
+  try {
+    const { county, permitType } = req.query;
+    
+    if (county && permitType) {
+      // Get specific template
+      const template = await prisma.checklistTemplate.findUnique({
+        where: { county_permitType: { county, permitType } },
+        include: {
+          items: {
+            orderBy: { order: 'asc' }
+          }
+        }
+      });
+      res.json(template);
+    } else {
+      // Get all templates
+      const templates = await prisma.checklistTemplate.findMany({
+        include: {
+          items: {
+            orderBy: { order: 'asc' }
+          }
+        }
+      });
+      res.json(templates);
+    }
+  } catch (error) {
+    console.error('Get checklist templates error:', error);
+    res.status(500).json({ error: 'Failed to fetch checklist templates' });
+  }
+});
+
+app.post('/api/checklist-templates', async (req, res) => {
+  try {
+    const { county, permitType, items } = req.body;
+    
+    const template = await prisma.checklistTemplate.upsert({
+      where: { county_permitType: { county, permitType } },
+      update: {
+        items: {
+          deleteMany: {},
+          create: items.map((item, index) => ({
+            name: item.name,
+            isRequired: item.isRequired || true,
+            isCustom: item.isCustom || false,
+            order: index
+          }))
+        }
+      },
+      create: {
+        county,
+        permitType,
+        items: {
+          create: items.map((item, index) => ({
+            name: item.name,
+            isRequired: item.isRequired || true,
+            isCustom: item.isCustom || false,
+            order: index
+          }))
+        }
+      },
+      include: {
+        items: {
+          orderBy: { order: 'asc' }
+        }
+      }
+    });
+    
+    res.json(template);
+  } catch (error) {
+    console.error('Create/update checklist template error:', error);
+    res.status(500).json({ error: 'Failed to create/update checklist template' });
+  }
+});
+
+app.put('/api/permits/:id/checklist', async (req, res) => {
+  try {
+    const packageId = parseInt(req.params.id);
+    const { items } = req.body; // Array of { checklistItemId, isCompleted, notes, completedBy }
+    
+    // Update checklist items
+    const updates = items.map(item => 
+      prisma.packageChecklistItem.update({
+        where: {
+          packageChecklistId_checklistItemId: {
+            packageChecklistId: item.packageChecklistId,
+            checklistItemId: item.checklistItemId
+          }
+        },
+        data: {
+          isCompleted: item.isCompleted,
+          completedAt: item.isCompleted ? new Date() : null,
+          completedBy: item.completedBy || null,
+          notes: item.notes || null
+        }
+      })
+    );
+    
+    await Promise.all(updates);
+    
+    // Return updated package
+    const updatedPackage = await prisma.package.findUnique({
+      where: { id: packageId },
+      include: {
+        documents: true,
+        contractor: true,
+        checklists: {
+          include: {
+            items: {
+              include: {
+                checklistItem: true
+              },
+              orderBy: {
+                checklistItem: {
+                  order: 'asc'
+                }
+              }
+            }
+          }
+        }
+      }
+    });
+    
+    res.json(updatedPackage);
+  } catch (error) {
+    console.error('Update package checklist error:', error);
+    res.status(500).json({ error: 'Failed to update package checklist' });
   }
 });
 

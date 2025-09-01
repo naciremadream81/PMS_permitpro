@@ -15,9 +15,8 @@ model User {
 }
 
 model Contractor {
-  id            Int       @id @default(autoincrement())
+  licenseNumber String    @id @unique
   companyName   String
-  licenseNumber String    @unique
   address       String
   phoneNumber   String
   email         String?
@@ -44,18 +43,19 @@ model Subcontractor {
 }
 
 model Package {
-  id              Int                    @id @default(autoincrement())
-  customerName    String
-  propertyAddress String
-  county          String
-  status          String                 @default("Draft")
-  createdAt       DateTime               @default(now())
-  updatedAt       DateTime               @updatedAt
-  permitType      String                 @default("Mobile Home Permit")
-  contractorId    Int
-  documents       Document[]
-  contractor      Contractor             @relation(fields: [contractorId], references: [id])
-  subcontractors  PackageSubcontractor[]
+  id                Int                    @id @default(autoincrement())
+  customerName      String
+  propertyAddress   String
+  county            String
+  status            String                 @default("Draft")
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  permitType        String                 @default("Mobile Home Permit")
+  contractorLicense String?
+  documents         Document[]
+  contractor        Contractor?            @relation(fields: [contractorLicense], references: [licenseNumber])
+  subcontractors    PackageSubcontractor[]
+  checklists        PackageChecklist[]
 }
 
 model PackageSubcontractor {
@@ -79,4 +79,51 @@ model Document {
   version      String   @default("1.0")
   packageId    Int
   package      Package  @relation(fields: [packageId], references: [id], onDelete: Cascade)
+}
+
+model ChecklistTemplate {
+  id          Int                   @id @default(autoincrement())
+  county      String
+  permitType  String
+  items       ChecklistItem[]
+  createdAt   DateTime              @default(now())
+  updatedAt   DateTime              @updatedAt
+  
+  @@unique([county, permitType])
+}
+
+model ChecklistItem {
+  id                    Int                @id @default(autoincrement())
+  name                  String
+  isRequired            Boolean            @default(true)
+  isCustom              Boolean            @default(false)
+  order                 Int                @default(0)
+  checklistTemplateId   Int
+  template              ChecklistTemplate  @relation(fields: [checklistTemplateId], references: [id], onDelete: Cascade)
+  packageItems          PackageChecklistItem[]
+}
+
+model PackageChecklist {
+  id        Int                    @id @default(autoincrement())
+  packageId Int
+  package   Package                @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  items     PackageChecklistItem[]
+  createdAt DateTime               @default(now())
+  updatedAt DateTime               @updatedAt
+  
+  @@unique([packageId])
+}
+
+model PackageChecklistItem {
+  id                  Int              @id @default(autoincrement())
+  packageChecklistId  Int
+  checklistItemId     Int
+  isCompleted         Boolean          @default(false)
+  completedAt         DateTime?
+  completedBy         String?
+  notes               String?
+  packageChecklist    PackageChecklist @relation(fields: [packageChecklistId], references: [id], onDelete: Cascade)
+  checklistItem       ChecklistItem    @relation(fields: [checklistItemId], references: [id], onDelete: Cascade)
+  
+  @@unique([packageChecklistId, checklistItemId])
 }

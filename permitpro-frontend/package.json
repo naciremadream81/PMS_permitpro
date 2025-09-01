@@ -4,9 +4,10 @@
   "description": "PermitPro Frontend Application",
   "main": "src/index.js",
   "scripts": {
-    "start": "node serve.js",
+    "start": "bun serve.js",
     "dev": "webpack serve --open",
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "serve": "bun serve.js"
   },
   "dependencies": {
     "react": "^18.2.0",

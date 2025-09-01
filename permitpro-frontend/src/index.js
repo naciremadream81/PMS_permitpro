@@ -154,15 +154,28 @@ const Badge = ({ children, status }) => {
   );
 };
 
-const Modal = ({ children, isOpen, onClose }) => {
+const Modal = ({ children, isOpen, onClose, size = "lg" }) => {
     if (!isOpen) return null;
+    
+    const sizeClasses = {
+        sm: "max-w-md",
+        md: "max-w-lg", 
+        lg: "max-w-2xl",
+        xl: "max-w-4xl",
+        full: "max-w-6xl"
+    };
+    
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50" onClick={onClose}>
-            <div className="relative bg-white rounded-lg shadow-xl w-full max-w-lg" onClick={e => e.stopPropagation()}>
-                <div className="p-6">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4" onClick={onClose}>
+            <div className={`relative bg-white rounded-lg shadow-xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden`} onClick={e => e.stopPropagation()}>
+                <div className="p-6 overflow-y-auto max-h-full">
                     {children}
                 </div>
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+                <button 
+                    onClick={onClose} 
+                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors duration-200 p-1 rounded-full hover:bg-gray-100"
+                    aria-label="Close modal"
+                >
                     <XIcon className="h-6 w-6" />
                 </button>
             </div>
@@ -258,45 +271,108 @@ const CreatePackageModal = ({ isOpen, onClose, onPackageCreate, contractors }) =
     };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose}>
-            <CardTitle>Create New Permit Package</CardTitle>
-            <CardDescription>Fill in the details below to start a new package.</CardDescription>
-            <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-                <div className="space-y-1">
-                    <Label htmlFor="customerName">Customer Name</Label>
-                    <Input id="customerName" value={customerName} onChange={e => setCustomerName(e.target.value)} required />
+        <Modal isOpen={isOpen} onClose={onClose} size="lg">
+            <div className="text-center mb-6">
+                <CardTitle className="text-2xl text-gray-900">Create New Permit Package</CardTitle>
+                <CardDescription className="text-gray-600 mt-2">Fill in the details below to start a new package.</CardDescription>
+            </div>
+            
+            <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <Label htmlFor="customerName" className="text-sm font-medium text-gray-700">Customer Name *</Label>
+                        <Input 
+                            id="customerName" 
+                            value={customerName} 
+                            onChange={e => setCustomerName(e.target.value)} 
+                            required 
+                            className="w-full"
+                            placeholder="Enter customer name"
+                        />
+                    </div>
+                    
+                    <div className="space-y-2">
+                        <Label htmlFor="county" className="text-sm font-medium text-gray-700">County *</Label>
+                        <Select 
+                            id="county" 
+                            value={county} 
+                            onChange={e => setCounty(e.target.value)}
+                            className="w-full"
+                        >
+                            {FLORIDA_COUNTIES.map(c => <option key={c} value={c}>{c}</option>)}
+                        </Select>
+                    </div>
                 </div>
-                <div className="space-y-1">
-                    <Label htmlFor="propertyAddress">Property Address</Label>
-                    <Input id="propertyAddress" value={propertyAddress} onChange={e => setPropertyAddress(e.target.value)} required />
+                
+                <div className="space-y-2">
+                    <Label htmlFor="propertyAddress" className="text-sm font-medium text-gray-700">Property Address *</Label>
+                    <Input 
+                        id="propertyAddress" 
+                        value={propertyAddress} 
+                        onChange={e => setPropertyAddress(e.target.value)} 
+                        required 
+                        className="w-full"
+                        placeholder="Enter full property address"
+                    />
                 </div>
-                <div className="space-y-1">
-                    <Label htmlFor="county">County</Label>
-                    <Select id="county" value={county} onChange={e => setCounty(e.target.value)}>
-                        {FLORIDA_COUNTIES.map(c => <option key={c} value={c}>{c}</option>)}
-                    </Select>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <Label htmlFor="permitType" className="text-sm font-medium text-gray-700">Permit Type *</Label>
+                        <Select 
+                            id="permitType" 
+                            value={permitType} 
+                            onChange={e => setPermitType(e.target.value)}
+                            className="w-full"
+                        >
+                            {PERMIT_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
+                        </Select>
+                    </div>
+                    
+                    <div className="space-y-2">
+                        <Label htmlFor="contractorLicense" className="text-sm font-medium text-gray-700">Primary Contractor</Label>
+                        <Select 
+                            id="contractorLicense" 
+                            value={contractorLicense} 
+                            onChange={e => setContractorLicense(e.target.value)}
+                            className="w-full"
+                        >
+                            <option value="">Select Contractor (Optional)</option>
+                            {contractors.map(contractor => (
+                                <option key={contractor.licenseNumber} value={contractor.licenseNumber}>
+                                    {contractor.companyName} - {contractor.licenseNumber}
+                                </option>
+                            ))}
+                        </Select>
+                    </div>
                 </div>
-                <div className="space-y-1">
-                    <Label htmlFor="permitType">Permit Type</Label>
-                    <Select id="permitType" value={permitType} onChange={e => setPermitType(e.target.value)}>
-                        {PERMIT_TYPES.map(type => <option key={type} value={type}>{type}</option>)}
-                    </Select>
-                </div>
-                <div className="space-y-1">
-                    <Label htmlFor="contractorLicense">Primary Contractor (Optional)</Label>
-                    <Select id="contractorLicense" value={contractorLicense} onChange={e => setContractorLicense(e.target.value)}>
-                        <option value="">Select Contractor</option>
-                        {contractors.map(contractor => (
-                            <option key={contractor.licenseNumber} value={contractor.licenseNumber}>
-                                {contractor.companyName} - {contractor.licenseNumber}
-                            </option>
-                        ))}
-                    </Select>
-                </div>
-                <div className="flex justify-end gap-2 pt-4">
-                    <Button type="button" variant="outline" onClick={onClose} disabled={isSubmitting}>Cancel</Button>
-                    <Button type="submit" disabled={isSubmitting}>
-                        {isSubmitting ? 'Creating...' : 'Create Package'}
+                
+                <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
+                    <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={onClose} 
+                        disabled={isSubmitting}
+                        className="px-6 py-2"
+                    >
+                        Cancel
+                    </Button>
+                    <Button 
+                        type="submit" 
+                        disabled={isSubmitting}
+                        className="px-6 py-2 bg-blue-600 hover:bg-blue-700"
+                    >
+                        {isSubmitting ? (
+                            <>
+                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                Creating...
+                            </>
+                        ) : (
+                            'Create Package'
+                        )}
                     </Button>
                 </div>
             </form>
