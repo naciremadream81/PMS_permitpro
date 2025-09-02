@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "build": "echo 'Building...' && bun run db:generate && echo 'Build complete'",
+    "build": "echo 'Building...' && npm run db:generate && echo 'Build complete'",
     "db:migrate": "prisma migrate deploy",
     "db:migrate:dev": "prisma migrate dev",
     "db:generate": "prisma generate",
@@ -16,9 +16,11 @@
     "db:studio": "prisma studio",
     "docker:build": "docker build -t permitpro .",
     "docker:run": "docker run -p 8000:8000 permitpro",
-    "frontend:dev": "cd permitpro-frontend && bun run dev",
-    "frontend:build": "cd permitpro-frontend && bun run build",
-    "frontend:start": "cd permitpro-frontend && bun run start"
+    "frontend:dev": "cd permitpro-frontend && npm run dev",
+    "frontend:build": "cd permitpro-frontend && npm run build",
+    "frontend:start": "cd permitpro-frontend && npm run start",
+    "setup": "chmod +x setup-env.sh && ./setup-env.sh",
+    "install-deps": "npm install && cd permitpro-frontend && npm install"
   },
   "dependencies": {
     "express": "^4.18.2",

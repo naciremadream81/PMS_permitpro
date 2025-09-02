@@ -25,6 +25,15 @@ fi
 
 echo "✅ Environment variables validated"
 
+# Check if frontend directory exists
+if [ ! -d "permitpro-frontend" ]; then
+    echo "❌ Error: permitpro-frontend directory not found!"
+    echo "📝 Please ensure the frontend code is in the permitpro-frontend directory"
+    exit 1
+fi
+
+echo "✅ Frontend directory found"
+
 # Stop existing services
 echo "🛑 Stopping existing services..."
 docker-compose -f docker-compose.production.yml down
@@ -49,18 +58,33 @@ docker-compose -f docker-compose.production.yml ps
 # Test the API
 echo "🧪 Testing API endpoint..."
 if curl -s http://localhost:8000/api/permits > /dev/null; then
-    echo "✅ API is responding successfully!"
+    echo "✅ Backend API is responding successfully!"
 else
-    echo "⚠️  API might still be starting up..."
+    echo "⚠️  Backend API might still be starting up..."
+fi
+
+# Test the Frontend
+echo "🧪 Testing Frontend..."
+if curl -s http://localhost:3000/ > /dev/null; then
+    echo "✅ Frontend is responding successfully!"
+else
+    echo "⚠️  Frontend might still be starting up..."
 fi
 
 echo ""
 echo "🎉 Deployment complete!"
 echo "🌐 Backend API: http://localhost:8000"
+echo "🎨 Frontend: http://localhost:3000"
 echo "🗄️  Database: Running in container"
 echo ""
 echo "📝 To view logs: docker-compose -f docker-compose.production.yml logs -f"
 echo "🛑 To stop: docker-compose -f docker-compose.production.yml down"
+echo ""
+echo "🔧 Next steps:"
+echo "   1. Set up Nginx reverse proxy for your domain (seanswonger.com)"
+echo "   2. Configure SSL/TLS with Let's Encrypt"
+echo "   3. Set up firewall rules"
+echo "   4. Configure regular backups"
 echo ""
 echo "🔒 Security notes:"
 echo "   - Change default passwords"

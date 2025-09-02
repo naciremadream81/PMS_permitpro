@@ -122,7 +122,8 @@ chmod +x deploy-linode.sh
 ufw allow ssh
 
 # Allow HTTP (if not using reverse proxy)
-ufw allow 8000
+ufw allow 8000  # Backend API
+ufw allow 3000  # Frontend
 
 # Allow HTTPS (recommended)
 ufw allow 443
@@ -152,15 +153,41 @@ nano /etc/nginx/sites-available/permitpro
 ```nginx
 server {
     listen 80;
-    server_name yourdomain.com;
+    server_name seanswonger.com;
 
+    # Serve frontend (React app)
     location / {
+        proxy_pass http://localhost:3000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+    }
+
+    # Proxy API requests to backend
+    location /api/ {
         proxy_pass http://localhost:8000;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection 'upgrade';
         proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
         proxy_cache_bypass $http_upgrade;
+    }
+
+    # Proxy uploads to backend
+    location /uploads/ {
+        proxy_pass http://localhost:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 ```
@@ -175,7 +202,7 @@ systemctl reload nginx
 5. **Install SSL with Let's Encrypt:**
 ```bash
 apt install certbot python3-certbot-nginx -y
-certbot --nginx -d yourdomain.com
+certbot --nginx -d seanswonger.com
 ```
 
 ## 🔒 **Security Best Practices**
@@ -334,17 +361,18 @@ nano /etc/docker/daemon.json
 ## 🎉 **You're All Set!**
 
 Your PermitPro application is now running on Linode with:
-- ✅ **Production-ready backend**
+- ✅ **Production-ready backend API**
+- ✅ **React frontend application**
 - ✅ **PostgreSQL database**
 - ✅ **Automatic restarts**
 - ✅ **Health checks**
 - ✅ **Security best practices**
 
 **Next steps:**
-1. Test your API endpoints
+1. Test your application at `https://seanswonger.com`
 2. Set up monitoring
 3. Configure backups
-4. Set up SSL if using a domain
+4. Set up SSL with Let's Encrypt
 5. Monitor performance and scale as needed
 
 ---

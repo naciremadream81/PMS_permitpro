@@ -129,8 +129,18 @@ app.use('/uploads', express.static(path.join(__dirname, uploadsDir)));
 // Auth
 app.post('/api/auth/login', async (req, res) => {
   try {
-    // In a real app, you'd validate credentials here
+    // Validate input
     const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email and password are required' });
+    }
+    
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({ error: 'Invalid email format' });
+    }
     
     // For demo purposes, accept any login
     let user = await prisma.user.findUnique({
@@ -224,14 +234,31 @@ app.post('/api/permits', async (req, res) => {
   try {
     const { customerName, propertyAddress, county, permitType, contractorLicense } = req.body;
     
+    // Validate required fields
+    if (!customerName || !propertyAddress || !county || !permitType) {
+      return res.status(400).json({ 
+        error: 'Missing required fields',
+        required: ['customerName', 'propertyAddress', 'county', 'permitType']
+      });
+    }
+    
+    // Validate permit type
+    const validPermitTypes = ['Mobile Home Permit', 'Modular Home Permit', 'Shed Permit'];
+    if (!validPermitTypes.includes(permitType)) {
+      return res.status(400).json({ 
+        error: 'Invalid permit type',
+        validTypes: validPermitTypes
+      });
+    }
+    
     const newPackage = await prisma.package.create({
       data: {
-        customerName,
-        propertyAddress,
-        county,
+        customerName: customerName.trim(),
+        propertyAddress: propertyAddress.trim(),
+        county: county.trim(),
         permitType,
         status: 'Draft',
-        contractorLicense: contractorLicense || null
+        contractorLicense: contractorLicense ? contractorLicense.trim() : null
       },
       include: {
         documents: true,
@@ -571,8 +598,8 @@ app.put('/api/contractors/:id/reassign-packages', async (req, res) => {
     
     // Reassign all packages from old contractor to new contractor
     const updatedPackages = await prisma.package.updateMany({
-      where: { contractorId: oldContractorId },
-      data: { contractorId: newContractorId }
+      where: { contractorLicense: oldContractorId },
+      data: { contractorLicense: newContractorId }
     });
     
     res.json({ 
@@ -593,7 +620,7 @@ app.delete('/api/contractors/:id', async (req, res) => {
     
     // Check if contractor has any packages assigned
     const packagesWithContractor = await prisma.package.findMany({
-      where: { contractorId: id }
+      where: { contractorLicense: id }
     });
     
     if (packagesWithContractor.length > 0) {
