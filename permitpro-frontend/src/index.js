@@ -8,7 +8,7 @@ import { SubcontractorAssignmentModal } from './subcontractor-assignment-modal';
 
 // --- API HELPERS ---
 // Get API base URL from environment variable or default to localhost
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+const API_BASE_URL = ''; // same-origin; nginx proxies /api to backendt API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
 const api = {
   get: async (url) => {
