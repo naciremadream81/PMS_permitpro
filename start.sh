@@ -2,10 +2,22 @@
 
 echo "🚀 Starting PermitPro Backend..."
 
-# Check if .env file exists
-if [ ! -f .env ]; then
+# Check if .env file exists or if we're running in Docker (environment variables are set)
+if [ ! -f .env ] && [ -z "$DATABASE_URL" ]; then
     echo "❌ .env file not found! Please run: npm run setup"
     exit 1
+fi
+
+# If running in Docker, create a .env file from environment variables
+if [ -n "$DATABASE_URL" ]; then
+    echo "🐳 Running in Docker mode, using environment variables"
+    cat > .env << EOF
+DATABASE_URL=$DATABASE_URL
+JWT_SECRET=$JWT_SECRET
+CORS_ORIGIN=$CORS_ORIGIN
+NODE_ENV=$NODE_ENV
+PORT=$PORT
+EOF
 fi
 
 # Wait for database to be ready

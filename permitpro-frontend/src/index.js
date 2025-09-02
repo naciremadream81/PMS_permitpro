@@ -98,17 +98,29 @@ const DownloadIcon = (props) => (
 
 // --- UI COMPONENTS ---
 function Card({ children, className = '' }) {
-  return <div className={`bg-white border border-gray-200 rounded-lg shadow-sm ${className}`}>{children}</div>;
+  return <div className={`modern-card ${className}`}>{children}</div>;
 }
-const CardHeader = ({ children, className = '' }) => <div className={`p-6 border-b border-gray-200 ${className}`}>{children}</div>;
-const CardContent = ({ children, className = '' }) => <div className={`p-6 ${className}`}>{children}</div>;
-const CardFooter = ({ children, className = '' }) => <div className={`p-6 pt-0 border-t border-gray-200 ${className}`}>{children}</div>;
-const CardTitle = ({ children, className = '' }) => <h3 className={`text-lg font-semibold leading-none tracking-tight ${className}`}>{children}</h3>;
-const CardDescription = ({ children, className = '' }) => <p className={`text-sm text-gray-500 ${className}`}>{children}</p>;
-const Button = ({ children, onClick, className = '', variant = 'default', size = 'default', ...props }) => {
-  const baseClasses = "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
-  const sizeClasses = { default: "h-10 px-4 py-2", sm: "h-9 px-3 py-1.5 text-xs", xs: "h-8 px-2 py-1 text-xs" };
-  const variantClasses = { default: "bg-gray-900 text-white hover:bg-gray-800", destructive: "bg-red-600 text-white hover:bg-red-700", outline: "bg-transparent border border-gray-300 hover:bg-gray-100", ghost: "bg-transparent hover:bg-gray-100", };
+const CardHeader = ({ children, className = '' }) => <div className={`modern-card-header ${className}`}>{children}</div>;
+const CardContent = ({ children, className = '' }) => <div className={`modern-card-content ${className}`}>{children}</div>;
+const CardFooter = ({ children, className = '' }) => <div className={`modern-card-footer ${className}`}>{children}</div>;
+const CardTitle = ({ children, className = '' }) => <h3 className={`text-xl font-bold leading-tight tracking-tight text-gray-900 ${className}`}>{children}</h3>;
+const CardDescription = ({ children, className = '' }) => <p className={`text-sm text-gray-600 mt-1 ${className}`}>{children}</p>;
+const Button = ({ children, onClick, className = '', variant = 'primary', size = 'default', ...props }) => {
+  const baseClasses = "modern-btn focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none";
+  const sizeClasses = { 
+    default: "h-11 px-6 py-2.5", 
+    sm: "h-9 px-4 py-2 text-sm", 
+    xs: "h-8 px-3 py-1.5 text-xs",
+    lg: "h-12 px-8 py-3 text-base"
+  };
+  const variantClasses = { 
+    primary: "modern-btn-primary focus:ring-blue-500", 
+    secondary: "modern-btn-secondary focus:ring-gray-500", 
+    success: "modern-btn-success focus:ring-green-500",
+    warning: "modern-btn-warning focus:ring-yellow-500",
+    error: "modern-btn-error focus:ring-red-500",
+    outline: "modern-btn-secondary focus:ring-gray-500"
+  };
   return (
     <button onClick={onClick} className={`${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]} ${className}`} {...props}>
       {children}
@@ -117,38 +129,38 @@ const Button = ({ children, onClick, className = '', variant = 'default', size =
 };
 const Input = ({ className = '', ...props }) => (
   <input
-    className={`flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+    className={`modern-input ${className}`}
     {...props}
   />
 );
 const Select = ({ children, className = '', ...props }) => (
     <select
-        className={`flex h-10 w-full rounded-md border border-gray-300 bg-transparent px-3 py-2 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${className}`}
+        className={`modern-select ${className}`}
         {...props}
     >
         {children}
     </select>
 );
 const Label = ({ children, htmlFor, className = '' }) => (
-  <label htmlFor={htmlFor} className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${className}`}>
+  <label htmlFor={htmlFor} className={`block text-sm font-semibold text-gray-700 mb-2 ${className}`}>
     {children}
   </label>
 );
-const Table = ({ children, className = '' }) => <div className={`w-full overflow-auto ${className}`}><table className="w-full caption-bottom text-sm">{children}</table></div>;
-const TableHeader = ({ children, className = '' }) => <thead className={`[&_tr]:border-b ${className}`}>{children}</thead>;
-const TableBody = ({ children, className = '' }) => <tbody className={`[&_tr:last-child]:border-0 ${className}`}>{children}</tbody>;
-const TableRow = ({ children, className = '', ...props }) => <tr className={`border-b transition-colors hover:bg-gray-50 ${className}`} {...props}>{children}</tr>;
-const TableHead = ({ children, className = '' }) => <th className={`h-12 px-4 text-left align-middle font-medium text-gray-500 ${className}`}>{children}</th>;
-const TableCell = ({ children, className = '' }) => <td className={`p-4 align-middle ${className}`}>{children}</td>;
+const Table = ({ children, className = '' }) => <div className={`w-full overflow-auto rounded-lg ${className}`}><table className="modern-table">{children}</table></div>;
+const TableHeader = ({ children, className = '' }) => <thead className={className}>{children}</thead>;
+const TableBody = ({ children, className = '' }) => <tbody className={className}>{children}</tbody>;
+const TableRow = ({ children, className = '', ...props }) => <tr className={className} {...props}>{children}</tr>;
+const TableHead = ({ children, className = '' }) => <th className={className}>{children}</th>;
+const TableCell = ({ children, className = '' }) => <td className={className}>{children}</td>;
 
 const Badge = ({ children, status }) => {
   const statusClasses = {
-    Draft: "bg-yellow-100 text-yellow-800 border-yellow-200",
-    Submitted: "bg-blue-100 text-blue-800 border-blue-200",
-    Completed: "bg-green-100 text-green-800 border-green-200",
+    Draft: "modern-badge modern-badge-draft",
+    Submitted: "modern-badge modern-badge-submitted",
+    Completed: "modern-badge modern-badge-completed",
   };
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusClasses[status] || 'bg-gray-100 text-gray-800 border-gray-200'}`}>
+    <span className={`${statusClasses[status] || 'modern-badge bg-gray-100 text-gray-800 border-gray-200'}`}>
       {children}
     </span>
   );
@@ -166,14 +178,14 @@ const Modal = ({ children, isOpen, onClose, size = "lg" }) => {
     };
     
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4" onClick={onClose}>
-            <div className={`relative bg-white rounded-lg shadow-xl w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden`} onClick={e => e.stopPropagation()}>
-                <div className="p-6 overflow-y-auto max-h-full">
+        <div className="modern-modal-overlay" onClick={onClose}>
+            <div className={`modern-modal w-full ${sizeClasses[size]} max-h-[90vh] overflow-hidden`} onClick={e => e.stopPropagation()}>
+                <div className="p-8 overflow-y-auto max-h-full">
                     {children}
                 </div>
                 <button 
                     onClick={onClose} 
-                    className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition-colors duration-200 p-1 rounded-full hover:bg-gray-100"
+                    className="absolute top-6 right-6 text-gray-400 hover:text-gray-600 transition-colors duration-200 p-2 rounded-full hover:bg-gray-100"
                     aria-label="Close modal"
                 >
                     <XIcon className="h-6 w-6" />
@@ -207,30 +219,76 @@ const LoginPage = ({ onLogin }) => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="w-full max-w-md">
-        <Card>
-          <CardHeader>
-            <CardTitle>Welcome to PermitPro</CardTitle>
-            <CardDescription>Enter your credentials to access your dashboard.</CardDescription>
+    <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <div className="text-center">
+          <div className="mx-auto h-16 w-16 bg-gradient-to-r from-blue-600 to-blue-700 rounded-full flex items-center justify-center mb-6">
+            <span className="text-2xl">📋</span>
+          </div>
+          <h2 className="text-3xl font-bold text-gray-900">Welcome to PermitPro</h2>
+          <p className="mt-2 text-sm text-gray-600">Professional Permit Management System</p>
+        </div>
+        
+        <Card className="shadow-2xl">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl">Sign in to your account</CardTitle>
+            <CardDescription>Enter your credentials to access your dashboard</CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
-              <div className="space-y-1">
-                <Label htmlFor="email">Email</Label>
-                <Input id="email" type="email" placeholder="admin@permitpro.com" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <form onSubmit={handleLogin} className="space-y-6">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email Address</Label>
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="admin@permitpro.com" 
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)} 
+                  required 
+                  className="text-base"
+                />
               </div>
-              <div className="space-y-1">
+              <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input id="password" type="password" placeholder="password123" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                <Input 
+                  id="password" 
+                  type="password" 
+                  placeholder="Enter your password" 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)} 
+                  required 
+                  className="text-base"
+                />
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
-                {isLoading ? 'Signing In...' : 'Sign In'}
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                  <p className="text-sm text-red-600">{error}</p>
+                </div>
+              )}
+              <Button 
+                type="submit" 
+                className="w-full" 
+                size="lg"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <div className="modern-loading mr-2"></div>
+                    Signing In...
+                  </>
+                ) : (
+                  'Sign In'
+                )}
               </Button>
             </form>
           </CardContent>
         </Card>
+        
+        <div className="text-center">
+          <p className="text-xs text-gray-500">
+            Secure permit management for professionals
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -272,7 +330,10 @@ const CreatePackageModal = ({ isOpen, onClose, onPackageCreate, contractors }) =
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} size="lg">
-            <div className="text-center mb-6">
+            <div className="text-center mb-8">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-600 to-blue-700 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <PlusCircleIcon className="w-8 h-8 text-white" />
+                </div>
                 <CardTitle className="text-2xl text-gray-900">Create New Permit Package</CardTitle>
                 <CardDescription className="text-gray-600 mt-2">Fill in the details below to start a new package.</CardDescription>
             </div>
@@ -350,24 +411,22 @@ const CreatePackageModal = ({ isOpen, onClose, onPackageCreate, contractors }) =
                 <div className="flex justify-end gap-3 pt-6 border-t border-gray-200">
                     <Button 
                         type="button" 
-                        variant="outline" 
+                        variant="secondary" 
                         onClick={onClose} 
                         disabled={isSubmitting}
-                        className="px-6 py-2"
+                        size="lg"
                     >
                         Cancel
                     </Button>
                     <Button 
                         type="submit" 
                         disabled={isSubmitting}
-                        className="px-6 py-2 bg-blue-600 hover:bg-blue-700"
+                        variant="primary"
+                        size="lg"
                     >
                         {isSubmitting ? (
                             <>
-                                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
+                                <div className="modern-loading mr-2"></div>
                                 Creating...
                             </>
                         ) : (
@@ -752,10 +811,12 @@ const App = () => {
     if (!permitPackage) {
         return (
             <Card className="h-full">
-                <CardContent className="flex flex-col items-center justify-center h-full text-center text-gray-500">
-                    <FileIcon className="w-16 h-16 mb-4" />
-                    <h3 className="text-lg font-semibold">No Package Selected</h3>
-                    <p>Select a permit package from the list to view its details.</p>
+                <CardContent className="flex flex-col items-center justify-center h-full text-center py-16">
+                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                        <FileIcon className="w-10 h-10 text-gray-400" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900 mb-2">No Package Selected</h3>
+                    <p className="text-gray-500 max-w-sm">Select a permit package from the list to view its details, manage documents, and track progress.</p>
                 </CardContent>
             </Card>
         );
@@ -832,67 +893,117 @@ const App = () => {
 
     return (
         <Card className="h-full flex flex-col">
-            <CardHeader>
-                <CardTitle>Package #{permitPackage.id}</CardTitle>
-                <CardDescription>{permitPackage.customerName} - {permitPackage.propertyAddress}</CardDescription>
+            <CardHeader className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b-2 border-blue-200">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <CardTitle className="text-2xl text-blue-900">Package #{permitPackage.id}</CardTitle>
+                        <CardDescription className="text-blue-700 mt-1">
+                            {permitPackage.customerName} • {permitPackage.propertyAddress}
+                        </CardDescription>
+                    </div>
+                    <Badge status={permitPackage.status}>{permitPackage.status}</Badge>
+                </div>
             </CardHeader>
-            <CardContent className="flex-grow space-y-6">
-                <div className="space-y-2">
-                    <h4 className="font-semibold">Package Details</h4>
-                    <div className="grid grid-cols-2 gap-2 text-sm">
-                        <p className="text-gray-500">County:</p><p>{permitPackage.county}</p>
-                        <p className="text-gray-500">Permit Type:</p><p>{permitPackage.permitType}</p>
-                        <p className="text-gray-500">Status:</p>
-                        <div>
-                            <Badge status={permitPackage.status}>{permitPackage.status}</Badge>
+            <CardContent className="flex-grow space-y-8">
+                <div className="bg-gray-50 rounded-lg p-6">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Package Details
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-3">
+                            <div>
+                                <label className="text-sm font-medium text-gray-500">County</label>
+                                <p className="text-gray-900 font-medium">{permitPackage.county}</p>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-500">Permit Type</label>
+                                <p className="text-gray-900 font-medium">{permitPackage.permitType}</p>
+                            </div>
                         </div>
-                        <p className="text-gray-500">Created:</p><p>{new Date(permitPackage.createdAt).toLocaleDateString()}</p>
+                        <div className="space-y-3">
+                            <div>
+                                <label className="text-sm font-medium text-gray-500">Created Date</label>
+                                <p className="text-gray-900 font-medium">{new Date(permitPackage.createdAt).toLocaleDateString()}</p>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium text-gray-500">Last Updated</label>
+                                <p className="text-gray-900 font-medium">{new Date(permitPackage.updatedAt).toLocaleDateString()}</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 {/* Contractor Information */}
-                <div className="space-y-2">
-                    <h4 className="font-semibold">Contractor Information</h4>
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                        <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        Contractor Information
+                    </h4>
                     {permitPackage.contractor ? (
-                        <div className="border rounded-lg p-3 bg-gray-50">
-                            <div className="flex justify-between items-start mb-2">
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div className="flex justify-between items-start mb-4">
                                 <div>
-                                    <h5 className="font-medium">{permitPackage.contractor.companyName}</h5>
-                                    <p className="text-sm text-gray-600">License: {permitPackage.contractor.licenseNumber}</p>
+                                    <h5 className="text-lg font-semibold text-green-900">{permitPackage.contractor.companyName}</h5>
+                                    <p className="text-sm text-green-700 font-medium">License: {permitPackage.contractor.licenseNumber}</p>
                                 </div>
                                 <div className="flex gap-2">
                                     <Button 
                                         onClick={() => setSubcontractorAssignmentModalOpen(true)} 
                                         size="sm" 
-                                        variant="outline"
+                                        variant="secondary"
                                     >
-                                        Manage Package Subcontractors
+                                        Manage Subcontractors
                                     </Button>
                                     <Button 
                                         onClick={() => setContractorSelectionModalOpen(true)} 
                                         size="sm" 
                                         variant="outline"
                                     >
-                                        Change Contractor
+                                        Change
                                     </Button>
                                 </div>
                             </div>
-                            <div className="text-sm text-gray-600 space-y-1">
-                                <p>{permitPackage.contractor.address}</p>
-                                <p>Phone: {permitPackage.contractor.phoneNumber}</p>
-                                {permitPackage.contractor.email && <p>Email: {permitPackage.contractor.email}</p>}
-                                {permitPackage.contractor.contactPerson && <p>Contact: {permitPackage.contractor.contactPerson}</p>}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                <div>
+                                    <label className="text-green-600 font-medium">Address</label>
+                                    <p className="text-green-800">{permitPackage.contractor.address}</p>
+                                </div>
+                                <div>
+                                    <label className="text-green-600 font-medium">Phone</label>
+                                    <p className="text-green-800">{permitPackage.contractor.phoneNumber}</p>
+                                </div>
+                                {permitPackage.contractor.email && (
+                                    <div>
+                                        <label className="text-green-600 font-medium">Email</label>
+                                        <p className="text-green-800">{permitPackage.contractor.email}</p>
+                                    </div>
+                                )}
+                                {permitPackage.contractor.contactPerson && (
+                                    <div>
+                                        <label className="text-green-600 font-medium">Contact Person</label>
+                                        <p className="text-green-800">{permitPackage.contractor.contactPerson}</p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     ) : (
-                        <div className="border rounded-lg p-3 bg-yellow-50">
-                            <div className="flex justify-between items-center mb-2">
-                                <span className="text-yellow-800">No contractor assigned to this package</span>
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                            <div className="flex justify-between items-center">
+                                <div className="flex items-center">
+                                    <svg className="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                                    </svg>
+                                    <span className="text-yellow-800 font-medium">No contractor assigned to this package</span>
+                                </div>
                                 <Button 
                                     onClick={() => setContractorSelectionModalOpen(true)} 
                                     size="sm" 
-                                    variant="outline"
-                                    className="bg-yellow-100 text-yellow-800 border-yellow-300 hover:bg-yellow-200"
+                                    variant="warning"
                                 >
                                     Assign Contractor
                                 </Button>
@@ -929,22 +1040,26 @@ const App = () => {
                         </div>
                     </div>
                 )}
-                <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                        <h4 className="font-semibold">Documents</h4>
+                <div className="bg-white border border-gray-200 rounded-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                        <h4 className="text-lg font-semibold text-gray-900 flex items-center">
+                            <svg className="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Documents
+                        </h4>
                         <div className="flex gap-2">
                             {permitPackage.documents && permitPackage.documents.length > 0 && (
                                 <Button 
                                     onClick={() => downloadAllDocuments(permitPackage.documents)} 
                                     size="sm" 
-                                    variant="outline"
-                                    className="bg-green-50 text-green-700 border-green-200 hover:bg-green-100"
+                                    variant="success"
                                 >
                                     <DownloadIcon className="w-4 h-4 mr-2" />
                                     Download All
                                 </Button>
                             )}
-                            <Button onClick={() => setUploadModalOpen(true)} size="sm" variant="outline">
+                            <Button onClick={() => setUploadModalOpen(true)} size="sm" variant="primary">
                                 <PlusCircleIcon className="w-4 h-4 mr-2" />
                                 Upload Document
                             </Button>
@@ -988,10 +1103,40 @@ const App = () => {
                     </div>
                 </div>
             </CardContent>
-            <CardFooter className="flex justify-end gap-2">
-                <Button variant="outline" onClick={() => handleStatusChange('Draft')} disabled={permitPackage.status === 'Draft'}>Set to Draft</Button>
-                <Button variant="outline" onClick={() => handleStatusChange('Submitted')} disabled={permitPackage.status === 'Submitted'}>Submit Package</Button>
-                <Button onClick={() => handleStatusChange('Completed')} disabled={permitPackage.status === 'Completed'}>Complete Package</Button>
+            <CardFooter className="bg-gray-50 border-t border-gray-200">
+                <div className="flex flex-col sm:flex-row gap-3 w-full">
+                    <div className="flex-1">
+                        <p className="text-sm text-gray-600">
+                            Update package status to track progress through the permit process
+                        </p>
+                    </div>
+                    <div className="flex gap-2">
+                        <Button 
+                            variant="secondary" 
+                            onClick={() => handleStatusChange('Draft')} 
+                            disabled={permitPackage.status === 'Draft'}
+                            size="sm"
+                        >
+                            Set to Draft
+                        </Button>
+                        <Button 
+                            variant="primary" 
+                            onClick={() => handleStatusChange('Submitted')} 
+                            disabled={permitPackage.status === 'Submitted'}
+                            size="sm"
+                        >
+                            Submit Package
+                        </Button>
+                        <Button 
+                            variant="success" 
+                            onClick={() => handleStatusChange('Completed')} 
+                            disabled={permitPackage.status === 'Completed'}
+                            size="sm"
+                        >
+                            Complete Package
+                        </Button>
+                    </div>
+                </div>
             </CardFooter>
             <UploadDocumentModal
                 isOpen={isUploadModalOpen}
@@ -1022,61 +1167,113 @@ const App = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-gray-800">PermitPro Dashboard</h1>
-          <div className="flex items-center gap-4">
-            <span className="text-sm text-gray-600">Welcome, {user.name} ({user.role})</span>
-            <Button onClick={handleLogout} variant="outline" size="sm">
-              <LogOutIcon className="w-4 h-4 mr-2" />
-              Logout
-            </Button>
-            <Button onClick={() => setChecklistModalOpen(true)} className="whitespace-nowrap">
-              <FileIcon className="w-4 h-4 mr-2" />
-              Checklist
-            </Button>
-            <Button onClick={() => setContractorModalOpen(true)} className="whitespace-nowrap">
-              <FileIcon className="w-4 h-4 mr-2" />
-              Contractors
-            </Button>
-            <Button onClick={() => setSubcontractorModalOpen(true)} className="whitespace-nowrap">
-              <FileIcon className="w-4 h-4 mr-2" />
-              Global Subcontractors
-            </Button>
+    <div className="min-h-screen">
+      <header className="modern-header sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="h-20 flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="h-10 w-10 bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-lg">P</span>
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900">PermitPro</h1>
+                <p className="text-sm text-gray-600">Professional Permit Management</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <div className="hidden md:flex items-center space-x-4">
+                <div className="text-right">
+                  <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                  <p className="text-xs text-gray-500 capitalize">{user.role}</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <Button onClick={() => setChecklistModalOpen(true)} variant="secondary" size="sm">
+                  <FileIcon className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Checklist</span>
+                </Button>
+                <Button onClick={() => setContractorModalOpen(true)} variant="secondary" size="sm">
+                  <FileIcon className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Contractors</span>
+                </Button>
+                <Button onClick={() => setSubcontractorModalOpen(true)} variant="secondary" size="sm">
+                  <FileIcon className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Subcontractors</span>
+                </Button>
+                <Button onClick={handleLogout} variant="outline" size="sm">
+                  <LogOutIcon className="w-4 h-4 mr-2" />
+                  <span className="hidden sm:inline">Logout</span>
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </header>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card className="bg-gradient-to-r from-blue-50 to-blue-100 border-blue-200">
+            <CardContent className="text-center">
+              <div className="text-3xl font-bold text-blue-600">{packages.length}</div>
+              <div className="text-sm text-blue-700 font-medium">Total Packages</div>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-to-r from-green-50 to-green-100 border-green-200">
+            <CardContent className="text-center">
+              <div className="text-3xl font-bold text-green-600">
+                {packages.filter(p => p.status === 'Completed').length}
+              </div>
+              <div className="text-sm text-green-700 font-medium">Completed</div>
+            </CardContent>
+          </Card>
+          <Card className="bg-gradient-to-r from-yellow-50 to-yellow-100 border-yellow-200">
+            <CardContent className="text-center">
+              <div className="text-3xl font-bold text-yellow-600">
+                {packages.filter(p => p.status === 'Draft').length}
+              </div>
+              <div className="text-sm text-yellow-700 font-medium">In Progress</div>
+            </CardContent>
+          </Card>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <div>
             <Card>
               <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div>
                   <CardTitle>Permit Packages</CardTitle>
-                  <CardDescription>A list of all permit packages in the system.</CardDescription>
+                  <CardDescription>Manage and track all permit packages in your system</CardDescription>
                 </div>
-                <div className="flex items-center gap-2 w-full sm:w-auto">
-                  <Input
-                    placeholder="Filter..."
-                    value={filter}
-                    onChange={(e) => setFilter(e.target.value)}
-                    className="w-full sm:w-48"
-                  />
-                  <Button onClick={() => setCreateModalOpen(true)} className="whitespace-nowrap">
-                    <PlusCircleIcon className="w-4 h-4 mr-2" />
-                    Create
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <div className="relative flex-1 sm:flex-none">
+                    <Input
+                      placeholder="Search packages..."
+                      value={filter}
+                      onChange={(e) => setFilter(e.target.value)}
+                      className="w-full sm:w-64 pl-10"
+                    />
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <Button onClick={() => setCreateModalOpen(true)} size="lg">
+                    <PlusCircleIcon className="w-5 h-5 mr-2" />
+                    New Package
                   </Button>
                 </div>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-0">
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>ID</TableHead>
+                      <TableHead>Package ID</TableHead>
                       <TableHead>Customer</TableHead>
                       <TableHead>Address</TableHead>
-                      <TableHead>Permit Type</TableHead>
+                      <TableHead>Type</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Created</TableHead>
                     </TableRow>
@@ -1084,26 +1281,56 @@ const App = () => {
                   <TableBody>
                     {isLoading ? (
                       <TableRow>
-                        <TableCell colSpan="6" className="text-center py-10 text-gray-500">Loading packages...</TableCell>
+                        <TableCell colSpan="6" className="text-center py-12">
+                          <div className="flex flex-col items-center">
+                            <div className="modern-loading mb-4"></div>
+                            <p className="text-gray-500">Loading packages...</p>
+                          </div>
+                        </TableCell>
                       </TableRow>
                     ) : error ? (
                        <TableRow>
-                        <TableCell colSpan="6" className="text-center py-10 text-red-500">{error}</TableCell>
+                        <TableCell colSpan="6" className="text-center py-12">
+                          <div className="flex flex-col items-center">
+                            <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                              <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                            <p className="text-red-600 font-medium">{error}</p>
+                          </div>
+                        </TableCell>
                       </TableRow>
                     ) : filteredPackages.length > 0 ? (
                       filteredPackages.map((pkg) => (
-                        <TableRow key={pkg.id} onClick={() => setSelectedPackageId(pkg.id)} className="cursor-pointer">
-                          <TableCell className="font-medium">#{pkg.id}</TableCell>
-                          <TableCell>{pkg.customerName}</TableCell>
-                          <TableCell>{pkg.propertyAddress}</TableCell>
-                          <TableCell>{pkg.permitType}</TableCell>
+                        <TableRow 
+                          key={pkg.id} 
+                          onClick={() => setSelectedPackageId(pkg.id)} 
+                          className={`cursor-pointer transition-all duration-200 ${
+                            selectedPackageId === pkg.id ? 'bg-blue-50 border-l-4 border-l-blue-500' : 'hover:bg-gray-50'
+                          }`}
+                        >
+                          <TableCell className="font-semibold text-blue-600">#{pkg.id}</TableCell>
+                          <TableCell className="font-medium">{pkg.customerName}</TableCell>
+                          <TableCell className="text-gray-600">{pkg.propertyAddress}</TableCell>
+                          <TableCell className="text-gray-600">{pkg.permitType}</TableCell>
                           <TableCell><Badge status={pkg.status}>{pkg.status}</Badge></TableCell>
-                          <TableCell>{new Date(pkg.createdAt).toLocaleDateString()}</TableCell>
+                          <TableCell className="text-gray-500">{new Date(pkg.createdAt).toLocaleDateString()}</TableCell>
                         </TableRow>
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan="6" className="text-center py-10 text-gray-500">No packages found.</TableCell>
+                        <TableCell colSpan="6" className="text-center py-12">
+                          <div className="flex flex-col items-center">
+                            <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                              <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                              </svg>
+                            </div>
+                            <p className="text-gray-500 font-medium">No packages found</p>
+                            <p className="text-gray-400 text-sm">Create your first package to get started</p>
+                          </div>
+                        </TableCell>
                       </TableRow>
                     )}
                   </TableBody>
